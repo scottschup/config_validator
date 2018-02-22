@@ -1,0 +1,123 @@
+components:
+  - header
+  - form
+  - sidebar
+component_configs:
+  header:
+    partial: empty_header
+  form:
+    use_counters: false
+    sections:
+      -
+        non_step: true
+        label:
+          text: If approved, where should we deposit your loan?
+          sublabel:
+            text: After completing your application and following the verification process, this is the account where the loan will be deposited.
+        elements:
+          -
+            element_type: alert_box
+            strong:
+              text: 'Important note about your bank account information:'
+            description:
+              text: The bank account that you enter must match the name associated with this application. We recommend using the bank account where the majority of your income is deposited. Also, we may ask to verify this information after you complete your application. If approved, your Electronic Fund Transfer (ACH) and Remotely Created Check (RCC) repayments will be withdrawn from this account on the scheduled payment dates.
+
+          # bank_account: acount_type
+          -
+            element_type: fieldset
+            always_show_child_fields: true
+            form_rows:
+              -
+                row_label:
+                  text: Account Type
+                  attrs:
+                    for: bank_account_account_type
+                form_groups:
+                  -
+                    field_type: radio_input
+                    field_options:
+                      object_name: bank_account
+                      attr_name: account_type
+                      radio_buttons:
+                        -
+                          label:
+                            text: Checking
+                          value: checking
+                        -
+                          label:
+                            text: Savings
+                          value: savings
+          -
+            element_type: fieldset
+            stackable: true
+            caption:
+              text: We use our high-level of security and encryption standards to keep your information safe.
+            form_rows:
+              # bank_account: routing_number
+              -
+                form_groups:
+                  -
+                    field_type: text_input
+                    field_options:
+                      object_name: bank_account
+                      attr_name: routing_number
+                      label:
+                        text: Routing Number
+                      placeholder: Routing Number
+                      error:
+                        client:
+                          text: Routing number must be 9 digits.
+              # bank_account: account_number
+              -
+                form_groups:
+                  -
+                    field_type: text_input
+                    field_options:
+                      object_name: bank_account
+                      attr_name: account_number
+                      label:
+                        text: Account Number
+                      placeholder: Account Number
+                      error:
+                        client:
+                          text: What is your account number?
+              # bank_account: account_number_confirmation
+              -
+                form_groups:
+                  -
+                    field_type: text_input
+                    field_options:
+                      object_name: bank_account
+                      attr_name: account_number_confirmation
+                      label:
+                        text: Confirm Account Number
+                      placeholder: Account Number
+                      error:
+                        client:
+                          text: Account numbers must match.
+
+          # Bank account blurb and image
+          -
+            element_type: bank_account
+            sections:
+              -
+                partial: check_image
+
+      # Submit button
+      -
+        non_step: true
+        elements:
+          -
+            element_type: submit_button
+            text: Continue to Final Step
+
+      # Legal notices
+      -
+        non_step: true
+        elements:
+          -
+            element_type: legal_notices
+            sections:
+              - partial: patriot_act_disclosure
+              - partial: amazon_disclaimer
+              - partial: copyright

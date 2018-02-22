@@ -1,0 +1,16 @@
+:personal:
+  :five_step:
+    :weight: 1.00
+    :path: "stage_variants/personal/five_step.yml"
+:personal_continued:
+  :five_step:
+    :weight: 1.00
+    :path: "stage_variants/personal_continued/five_step.yml"
+:rates_terms:
+  :five_step:
+    :weight: 1.00
+    :path: "stage_variants/rates_terms/five_step.yml"
+:completed:
+  :five_step:
+    :weight: 1.00
+    :path: "stage_variants/completed/five_step.yml"

@@ -1,0 +1,381 @@
+components:
+  - header
+  - form
+  - sidebar
+component_configs:
+  header:
+    sections:
+      -
+        elements:
+          -
+            element_type: title
+            text: Last step before seeing if you qualify for an AvantCard.
+          -
+            element_type: subtitle
+            text: Checking to see if you qualify for an AvantCard <strong>does not affect your credit score</strong>.
+  form:
+    use_counters: false
+    sections:
+      # Finances
+      -
+        label:
+          text: Please tell us a little about your financial situation.
+          bold: true
+        elements:
+          # income: income_type
+          -
+            element_type: fieldset
+            form_rows:
+              -
+                form_groups:
+                  -
+                    field_type: select_input
+                    field_options:
+                      object_name: income
+                      attr_name: income_type
+                      error:
+                        client:
+                          text: Please select your income type
+                      label:
+                        text: What's your employment status?
+                      option_tags:
+                        ruby_eval_key: income_types
+          # income: monthly_net_income
+          -
+            element_type: fieldset
+            form_element_type: fieldset
+            form_rows:
+              -
+                form_groups:
+                  -
+                    field_type: text_input
+                    field_options:
+                      object_name: income
+                      attr_name: monthly_net_income
+                      caption:
+                        text: Monthly Net Income is your income each month AFTER all taxes and deductions. Alimony, child support, or separate maintenance income need not be revealed if you do not wish to have it considered as a basis for repaying this card.
+                      error:
+                        client:
+                          text: What is your net income per month?
+                      input_attrs:
+                        type: tel
+                        class: form__input--dollar
+                      label:
+                        text: What's your individual monthly net income?
+          # customer_application_metadata: self_credit_score
+          -
+            element_type: fieldset
+            form_rows:
+              -
+                form_groups:
+                  -
+                    field_type: select_input
+                    field_options:
+                      object_name: customer_application_metadata
+                      attr_name: self_credit_score
+                      error:
+                        client:
+                          text: Select the purpose of this loan
+                      label:
+                        text: How would you rate your credit quality?
+                      option_tags:
+                        ruby_eval_key: self_credit_scores
+          # TODO: current bank account balance
+          -
+            element_type: fieldset
+            form_rows:
+              -
+                form_groups:
+                  -
+                    field_type: select_input
+                    field_options:
+                      object_name: customer_application_metadata
+                      attr_name: current_bank_account_balance
+                      error:
+                        client:
+                          text: Please select an option.
+                      label:
+                        text: What's your current bank account balance?
+                      option_tags:
+                        values_array:
+                          - I do not have a bank account
+                          - Less than $100
+                          - $100 - $200
+                          - $201 - $500
+                          - $501 - $1,000
+                          - Greater than $1,000
+      # Housing and consents
+      -
+        label:
+          text: What's your current living situation?
+          bold: true
+        elements:
+          # customer_address: address_1, address_2
+          -
+            element_type: fieldset
+            stackable: true
+            form_rows:
+              -
+                form_groups:
+                  -
+                    field_type: text_input
+                    field_options:
+                      object_name: customer_address
+                      attr_name: address_1
+                      address_autocomplete_enabled: false # This should be on though, yeah?
+                      error:
+                        client:
+                          text: What is your address?
+                      label:
+                        text: Address Line 1
+              -
+                form_groups:
+                  -
+                    field_type: text_input
+                    field_options:
+                      object_name: customer_address
+                      attr_name: address_2
+                      address_autocomplete_enabled: false # This should be on though, yeah?
+                      label:
+                        text: Address Line 2
+                        optional: true
+          # customer_address: city, state, zip
+          -
+            element_type: fieldset
+            form_rows:
+              -
+                form_groups:
+                  -
+                    field_type: text_input
+                    field_options:
+                      object_name: customer_address
+                      attr_name: city
+                      error:
+                        client:
+                          text: What is your city?
+                      label:
+                        text: City
+                  -
+                    field_type: select_input
+                    field_options:
+                      object_name: customer_address
+                      attr_name: state
+                      error:
+                        client:
+                          text: What is your state?
+                      label:
+                        text: State
+                      option_tags:
+                        ruby_eval_key: states
+                  -
+                    field_type: text_input
+                    field_options:
+                      object_name: customer_address
+                      attr_name: zip
+                      error:
+                        client:
+                          text: What is your zip code?
+                      label:
+                        text: Zip
+          # customer_address: military_address
+          -
+            element_type: fieldset
+            form_rows:
+              -
+                form_groups:
+                  -
+                    field_type: 'checkbox_input'
+                    field_options:
+                      hide_conditions:
+                        - false
+                      object_name: 'customer_address'
+                      attr_name: 'military_address'
+                      label:
+                        text: 'Military Address'
+          # customer_address: military_region
+          -
+            element_type: fieldset
+            is_grouped_radio: true
+            always_show_child_fields: true
+            attrs:
+              ng-hide: '!customer_address.military_address'
+            form_rows:
+              -
+                row_label:
+                  text: Regions
+                form_groups:
+                  -
+                    field_type: 'radio_input'
+                    field_options:
+                      object_name: 'customer_address'
+                      attr_name: 'military_region'
+                      radio_buttons:
+                        -
+                          label:
+                            text: AA
+                          value: AA
+                        -
+                          label:
+                            text: AP
+                          value: AP
+                        -
+                          label:
+                            text: AE
+                          value: AE
+                      error:
+                        client:
+                          text: Since you have checked your address as a military address, you must select a military region.
+          # customer_address: rent_or_own
+          -
+            element_type: fieldset
+            always_show_child_fields: true
+            form_rows:
+              -
+                row_label:
+                  text: Rent or own?
+                  attrs:
+                    for: rent_or_own
+                form_groups:
+                  -
+                    field_type: 'radio_input'
+                    field_options:
+                      object_name: 'customer_address'
+                      attr_name: 'rent_or_own'
+                      radio_buttons:
+                        -
+                          label:
+                            text: Rent
+                          value: rent
+                        -
+                          label:
+                            text: Own
+                          value: own
+                      error:
+                        client:
+                          text: Do you rent or own?
+          # customer_address: monthly_housing_payment (part of former monthly_housing_bundle)
+          -
+            element_type: fieldset
+            form_rows:
+              -
+                form_groups:
+                  -
+                    field_type: 'text_input'
+                    field_options:
+                      object_name: 'customer_address'
+                      attr_name: 'monthly_housing_payment'
+                      caption:
+                        text: 'If you live with others, only include the portion of the monthly housing payment you are responsible for.'
+                      error:
+                        client:
+                          text: 'What is your monthly housing payment? (Please input numbers only)'
+                      input_attrs:
+                        type: 'tel'
+                        class: 'form__input--dollar'
+                      label:
+                        text: 'Monthly Housing Payment'
+          # customer_application_metadata: acquisition_channel
+          # TODO: options currently coming from an API call; use Ruby eval instead
+          -
+            element_type: fieldset
+            always_show_child_fields: true
+            form_rows:
+              -
+                row_label:
+                  text: How did you hear about us?
+                  attrs:
+                    for: customer_application_metadata_acquisition_channel
+                    ng-show: isOrganic
+                row_attrs:
+                  ng-show: isOrganic
+                form_groups:
+                  -
+                    field_type: radio_input
+                    field_options:
+                      object_name: customer_application_metadata
+                      attr_name: acquisition_channel
+                      angular_array: config.acquisition_channels
+          # promotion: code
+          -
+            element_type: fieldset
+            stackable: true
+            label:
+              attrs:
+                for: new_promotion_coupon_code
+              text: Promotional Code or Letter Personal Offer Code
+            form_rows:
+              -
+                form_groups:
+                  -
+                    field_type: promo_code_input
+                    field_options:
+                      object_name: 'new_promotion'
+                      attr_name: 'coupon_code'
+                      error:
+                        client:
+                          text: The promotional code must only contain letters and numbers.
+              -
+                form_groups:
+                  -
+                    field_type: promo_code_button
+                    field_options:
+                      object_name: 'new_promotion'
+                      attr_name: 'coupon_code_button'
+                      button:
+                        text: Apply Promo Code
+
+          # Customer consents
+          -
+            element_type: consents
+            sections:
+              -
+                section_type: checkbox
+                states_first: true
+                consents:
+                  -
+                    field_options:
+                      object_name: customer
+                      attr_name: credit_report_authorization
+                      is_padded: true
+                      label:
+                        text: 'I read, understand, and consent to:'
+              -
+                section_type: li
+                consents:
+                  -
+                    field_options:
+                      label:
+                        template:
+                          text: the %{credit_report_pull_auth}
+                          data:
+                            credit_report_pull_auth:
+                              link_text: Credit Report Pull Authorization
+                              link_type: modal
+                              link_target: credit_report_authorization
+                  -
+                    field_options:
+                      label:
+                        text: Avant, its affiliates, and WebBank sharing among them any transactional history related to my financial products or services received through Avant or serviced by Avant for the purpose of evaluating me for credit.
+
+          # Schumer Box
+          -
+            element_type: schumer_box
+            partial: credit_card
+
+          # Submit button
+          -
+            element_type: submit_button
+            text: Complete Application and Continue
+            # Should this vvv be here at this point? Isn't this step the one that does the hard pull? If not, why did we get consent above? And why are we getting it again on the next step?
+            credit_score_disclaimer:
+              text: Checking if you qualify for an AvantCard will not affect your credit score.
+      # Legal notices
+      -
+        elements:
+          -
+            element_type: legal_notices
+            sections:
+              -
+                partial: patriot_act_disclosure
+              -
+                partial: copyright

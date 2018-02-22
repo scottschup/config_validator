@@ -1,0 +1,74 @@
+---
+- :section: main
+  :fields:
+    :customer:
+      :credit_report_authorization:
+        :required: true
+        :checkbox: true
+    :customer_application_metadata:
+      :acquisition_channel:
+        :required: false
+        :order: 220
+      :promo_code:
+        :required: false
+        :order: 230
+      :current_bank_account_balance:
+        :required: true
+        :required_for_source: credit_card_standard_path
+      :self_credit_score:
+        :required: true
+        :order: 250
+    :customer_address:
+      :address_1:
+        :required: true
+        :lead_required: true
+        :disabled: if_preapproved
+        :order: 20
+      :address_2:
+        :required: false
+        :disabled: if_preapproved
+        :order: 30
+      :rent_or_own:
+        :required: true
+        :lead_required: true
+        :order: 40
+      :monthly_housing_payment:
+        :required: true
+        :validation: regex
+        :parameter: "^(\\d+(\\.|\\,)?\\d*|\\.\\d+)$"
+        :order: 50
+      :city:
+        :required: true
+        :validation: regex
+        :parameter: "^([a-zA-Z\x80-ɏ]+(?:. |-| |'))*[a-zA-Z\x80-ɏ]*$"
+        :lead_required: true
+        :disabled: if_preapproved
+        :order: 60
+      :state:
+        :required: true
+        :validation: not_null
+        :lead_required: true
+        :disabled: if_preapproved
+        :order: 70
+      :zip:
+        :required: true
+        :lead_required: true
+        :disabled: if_preapproved
+        :order: 80
+      :military_region:
+        :required: if_military_address
+        :order: 90
+      :military_address:
+        :required: false
+        :order: 100
+    :income:
+      :income_type:
+        :required: true
+        :lead_required: true
+        :order: 190
+      :monthly_net_income:
+        :required: true
+        :validation: regex
+        :parameter: "^[0-9.,]+$"
+        :lead_required: true
+        :order: 210

@@ -1,0 +1,8 @@
+---
+- :section: main
+  :fields:
+    :customer_application_metadata:
+      :credit_hard_pull_consent:
+        :required: true
+        :checkbox: true
+        :hide: false

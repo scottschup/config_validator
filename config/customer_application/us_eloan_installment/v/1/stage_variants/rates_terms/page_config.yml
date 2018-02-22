@@ -1,0 +1,63 @@
+components:
+  - header
+  - form
+  - sidebar
+component_configs:
+  header:
+    sections:
+      -
+        elements:
+          -
+            element_type: title
+            text: 'You may be eligible for up to {{ product.maximum_requestable_amount | ProductMoney : config : 0 }}.'
+          -
+            element_type: subtitle
+            text: The rates you see here may change based on information obtained during the completion of your application and verification process.
+  form:
+    use_counters: true
+    sections:
+      -
+        label:
+          increment_counter: true
+          text: Drag to choose a loan amount
+        elements:
+          -
+            element_type: loan_amount_slider
+          -
+            element_type: no_orig_fee_eloan
+            content:
+              text: Some lenders charge an upfront fee on the customer’s loan amount. At Eloan, we are proud to offer our loans without an origination fee.
+      -
+        label:
+          increment_counter: true
+          text: Which loan option meets your needs?
+        elements:
+          -
+            element_type: loan_options
+            apr_popover:
+              template:
+                text: '%{tooltip}'
+                data:
+                  tooltip:
+                    link_type: tooltip
+                    link_icon: '#icon-exclamation-circle'
+                    link_content: 'APR is the total annual cost of the loan to the borrower, including any fees, expressed as a percentage. The APR of {{ loan.apr | ProductApr: 2 }}% reflects the interest rate of {{ loan.interest_rate | ProductApr: 2 }}%.'
+      # Submit button
+      -
+        non_step: true
+        elements:
+          -
+            element_type: submit_button
+            text: Continue
+            credit_score_disclaimer:
+              text: Continuing does not affect your credit score.
+
+      # Legal notices
+      -
+        non_step: true
+        elements:
+          -
+            element_type: legal_notices
+            sections:
+              - partial: patriot_act_disclosure
+              - partial: copyright_eloan

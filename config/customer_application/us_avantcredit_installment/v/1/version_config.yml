@@ -1,0 +1,170 @@
+apply:
+  renderer_version: 3
+  additional_templates:
+    # Not sure if/which of these are still needed; pretty sure that generic reassurance is not needed anymore
+    - /shared/v3/asides/customize_loan
+    - /shared/v3/asides/customize_credit_line
+    - /customer_application_renderer/v3/components/text_body/elements/declined/generic_reassurance
+    - /customer_application_renderer/v3/components/form/helpers/autocomplete_item
+  assets:
+    scripts:
+      apply:
+        - common.js
+        - us_avantcredit_installment.js
+      basic:
+        - v3/steps
+        - v3/iovation
+        - avant-analytics
+    styles:
+      - new_us_avant.css
+  include:
+    threat_matrix: true
+  layout: apply_layout
+  modals:
+    - call_and_text
+    - credit_report_authorization
+    - customer_end_user_agreement
+    - electronic_communications_consent
+    - lead_welcome
+    - loading
+    - marketing_material # ???
+    - privacy_notice
+    - sign_in
+    - terms_of_use
+    - upload_paystub
+  page_templates:
+    - home
+    - personal
+    - rates_terms
+    - contract
+    - bank_account
+    - additional_information
+    - declined
+    - service_failure
+  ruby_eval:
+    days: 'options_for_day'
+    income_types: "income_type_values.unshift(['', 'null']).uniq"
+    months: 'options_for_month'
+    loan_purposes: "Customer.loan_purpose_values.unshift(['', 'null'])"
+    # TODO: figure out why self_credit_score_form_options produces so many ['', 'null'] and [nil, 'null'] elements
+    self_credit_scores: "CustomerApplicationMetadataField.self_credit_score_form_options.reject { |el| el[0].nil? }.uniq"
+    states: "Address.states.map { |s| [s, s] }.unshift(['', 'null'])"
+    years: 'options_for_year'
+    years_last_50: 'options_for_last_years(50)'
+    pay_frequency: "options_for_select(pay_frequency_values.unshift([nil, '', {:'ng-value' => 'null'}]))"
+    upload_types: 'options_for_select(Attachment.upload_types)'
+  shared_configs:
+    sidebar:
+      elements:
+        -
+          partial: security_and_privacy
+        -
+          partial: chat_or_faq
+          details:
+            img_path: v3/support-faces/1.jpg
+        -
+          partial: trustpilot
+        -
+          partial: logos
+          details:
+            logos:
+              -
+                img_path: v3/icons/bbb.png
+                alt_text: Better Business Bureau
+              -
+                partial_path: digicert
+  page_configs:
+    declined:
+      template: splash_page
+      components:
+        - text_body
+        - footer
+      component_configs:
+        text_body:
+          sections:
+            -
+              attrs:
+                ng-if: '!hasPartnerOffers'
+              elements:
+                -
+                  element_type: icon
+                -
+                  element_type: title
+                  text: Thank you for your application. There is nothing left for you to do at this time.
+                -
+                  element_type: subtitle
+                  text: We have all the information we need and aim to make a final decision on your loan eligibility in 24 hours.
+                -
+                  element_type: subtitle
+                  text: Your decision will be emailed to you at {{customer.email}}
+            -
+              attrs:
+                ng-if: declinedReason === 'tu_security_freeze'
+              partial: declined/tu_security_freeze
+            -
+              attrs:
+                ng-if: hasPartnerOffers
+              elements:
+                -
+                  element_type: icon
+                -
+                  element_type: title
+                  text: Unfortunately we cannot provide you with a loan through Avant at this time.
+                -
+                  element_type: subtitle
+                  attrs:
+                    class: dashboard-splash__headline headline headline--effra-small
+                    ng-show: '!hasHardInquiry'
+                  text: Your credit score has not been impacted.
+                -
+                  element_type: body
+                  partial: declined/partner_offers
+        footer:
+          elements:
+            -
+              partial: legal_notices
+              sections:
+                -
+                  partial: declined_legal
+                  details:
+                    small_sections:
+                      - 
+                        text: We appreciate you taking the time to apply for a loan through Avant. If you would like a written explanation as to why you were not approved, please request one by writing to the address below.
+                      -
+                        text_lines:
+                          - 'Attn: Customer Service'
+                          - Avant
+                          - 222 N. Lasalle St., Suite 1700
+                          - Chicago, Illinois, 60601
+                      -
+                        attrs:
+                          ng-if: hasPartnerOffers
+                        text: '<strong>Disclaimer: </strong>Avant and the partner(s) above are independent companies who have partnered to create and present these messages. Neither institution has the authority to evaluate a credit application on behalf of the other. WebBank does not have a relationship with the partner(s) listed above. By clicking the button(s) above, you will b eleaving the Avant website and entering the partner website.'
+                -
+                  partial: patriot_act_disclosure
+                -
+                  partial: copyright
+            -
+              partial: pixels
+    home:
+      components:
+        - text_body
+      component_configs:
+        text_body:
+          partial: home
+          title:
+            text: We appreciate your patience
+    service_failure:
+      components:
+        - text_body
+        - footer
+      component_configs:
+        text_body:
+          partial: service_failure
+        footer:
+          elements:
+            -
+              partial: legal_notices
+              sections:
+                -
+                  partial: copyright

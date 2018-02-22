@@ -1,0 +1,839 @@
+components:
+  - header
+  - form
+  - sidebar
+component_configs:
+  header:
+    sections:
+      -
+        elements:
+          -
+            element_type: title
+            text: Welcome!
+          -
+            element_type: subtitle
+            text: Loans empower people to fuel their dreams. Let’s get you started by checking your rate. Completing this first step will not affect your credit score.
+  form:
+    use_counters: false
+    sections:
+      # Fieldsets and consents
+      -
+        non_step: true
+        elements:
+          -
+            element_type: form_top_alerts
+          # person: first_name, last_name
+          -
+            element_type: fieldset
+            form_rows:
+              -
+                form_groups:
+                  -
+                    field_type: 'text_input'
+                    field_options:
+                      object_name: 'person'
+                      attr_name: 'first_name'
+                      label:
+                        text: 'First Name'
+                      error:
+                        client:
+                          text: 'What is your first name?'
+                  -
+                    field_type: 'text_input'
+                    field_options:
+                      object_name: 'person'
+                      attr_name: 'last_name'
+                      label:
+                        text: 'Last Name'
+                      error:
+                        client:
+                          text: 'What is your last name?'
+          # customer_address: address_1, address_2
+          -
+            element_type: fieldset
+            form_rows:
+              -
+                form_groups:
+                  -
+                    field_type: 'text_input'
+                    field_options:
+                      object_name: 'customer_address'
+                      attr_name: 'address_1'
+                      address_autocomplete_enabled: false
+                      error:
+                        client:
+                          text: 'What is your address?'
+                      label:
+                        text: 'Address Line 1'
+              -
+                form_groups:
+                  -
+                    field_type: 'text_input'
+                    field_options:
+                      object_name: 'customer_address'
+                      attr_name: 'address_2'
+                      address_autocomplete_enabled: false
+                      label:
+                        text: 'Address Line 2'
+                        optional: true
+          # customer_address: city, state, zip
+          -
+            element_type: fieldset
+            form_rows:
+              -
+                form_groups:
+                  -
+                    field_type: 'text_input'
+                    field_options:
+                      object_name: 'customer_address'
+                      attr_name: 'city'
+                      error:
+                        client:
+                          text: 'What is your city?'
+                      label:
+                        text: 'City'
+                  -
+                    field_type: 'select_input'
+                    field_options:
+                      object_name: 'customer_address'
+                      attr_name: 'state'
+                      error:
+                        client:
+                          text: 'What is your state?'
+                      label:
+                        text: 'State'
+                      option_tags:
+                        ruby_eval_key: states
+                  -
+                    field_type: 'text_input'
+                    field_options:
+                      object_name: 'customer_address'
+                      attr_name: 'zip'
+                      error:
+                        client:
+                          text: 'What is your zip code?'
+                      label:
+                        text: 'Zip'
+          # customer_address: military_address
+          -
+            element_type: fieldset
+            form_rows:
+              -
+                form_groups:
+                  -
+                    field_type: 'checkbox_input'
+                    field_options:
+                      object_name: 'customer_address'
+                      attr_name: 'military_address'
+                      label:
+                        text: 'Military Address'
+          # customer_address: military_region
+          -
+            element_type: fieldset
+            is_grouped_radio: true
+            always_show_child_fields: true
+            attrs:
+              ng-hide: '!customer_address.military_address'
+            form_rows:
+              -
+                row_label:
+                  text: Regions
+                  attrs:
+                    for: customer_address_military_region
+                form_groups:
+                  -
+                    field_type: 'radio_input'
+                    field_options:
+                      object_name: 'customer_address'
+                      attr_name: 'military_region'
+                      radio_buttons:
+                        -
+                          label:
+                            text: AA
+                          value: AA
+                        -
+                          label:
+                            text: AP
+                          value: AP
+                        -
+                          label:
+                            text: AE
+                          value: AE
+                      error:
+                        client:
+                          text: Since you have checked your address as a military address, you must select a military region.
+          # customer_address: rent_or_own
+          -
+            element_type: fieldset
+            always_show_child_fields: true
+            form_rows:
+              -
+                row_label:
+                  text: Rent or own?
+                form_groups:
+                  -
+                    field_type: 'radio_input'
+                    field_options:
+                      object_name: 'customer_address'
+                      attr_name: 'rent_or_own'
+                      radio_buttons:
+                        -
+                          label:
+                            text: Rent
+                          value: rent
+                        -
+                          label:
+                            text: Own
+                          value: own
+                      error:
+                        client:
+                          text: Do you rent or own?
+          # customer_address: monthly_housing_payment (part of former monthly_housing_bundle)
+          -
+            element_type: fieldset
+            form_rows:
+              -
+                form_groups:
+                  -
+                    field_type: 'text_input'
+                    field_options:
+                      object_name: 'customer_address'
+                      attr_name: 'monthly_housing_payment'
+                      caption:
+                        text: 'If you live with others, only include the portion of the monthly housing payment you are responsible for.'
+                      error:
+                        client:
+                          text: 'What is your monthly housing payment? (Please input numbers only)'
+                      input_attrs:
+                        type: 'tel'
+                        class: 'form__input--dollar'
+                      label:
+                        text: 'Monthly Housing Payment'
+          # person: date_of_birth
+          -
+            element_type: fieldset
+            form_rows:
+              -
+                row_label:
+                  text: 'Date of Birth'
+                form_groups:
+                  -
+                    field_type: 'select_input'
+                    field_options:
+                      object_name: 'person'
+                      attr_name: 'date_of_birth_month'
+                      error:
+                        client:
+                          text: 'Please select a month'
+                      option_tags:
+                        ruby_eval_key: months
+                  -
+                    field_type: 'select_input'
+                    field_options:
+                      object_name: 'person'
+                      attr_name: 'date_of_birth_day'
+                      error:
+                        client:
+                          text: 'Please select a day'
+                      option_tags:
+                        ruby_eval_key: days
+                  -
+                    field_type: 'select_input'
+                    field_options:
+                      object_name: 'person'
+                      attr_name: 'date_of_birth_year'
+                      error:
+                        client:
+                          text: 'Please select a year'
+                      input_attrs:
+                        ng-trim: false
+                      option_tags:
+                        ruby_eval_key: years
+          # person: home_phone
+          -
+            element_type: fieldset
+            form_rows:
+              -
+                form_groups:
+                  -
+                    field_type: 'text_input'
+                    field_options:
+                      object_name: 'person'
+                      attr_name: 'home_phone'
+                      error:
+                        client:
+                          text: 'Please fill in your phone number'
+                      input_attrs:
+                        type: 'tel'
+                      label:
+                        text: 'Phone'
+          # customer: email
+          -
+            element_type: fieldset
+            attrs:
+              ng-hide: "requirements['customer.electronic_communications_consent']['hide']"
+            form_rows:
+              -
+                form_groups:
+                  -
+                    field_type: 'text_input'
+                    field_options:
+                      object_name: 'customer'
+                      attr_name: 'email'
+                      error:
+                        client:
+                          text: 'Please enter a valid email'
+                        server:
+                          preexisting:
+                            partial: 'preexisting_email'
+                            server_message:
+                              text: An account already exists with this information, please reset your account password to continue.
+                            client_message:
+                              text: 'It looks like you have an existing account. In order to continue, please reset your password using the link below:'
+                            link:
+                              href: /apply/send_recovery_email?field=email
+                              text: Click here to recover your old account
+                      input_attrs:
+                        type: 'email'
+                      label:
+                        text: 'Email'
+          # customer: password
+          -
+            element_type: fieldset
+            stackable: true
+            form_rows:
+              -
+                form_groups:
+                  -
+                    field_type: password_input
+                    field_options:
+                      object_name: customer
+                      attr_name: password
+                      error:
+                        client:
+                          text: 'One uppercase, one lowercase, and one number'
+                      label:
+                        text: Create Password
+              # customer: password_confirmation
+              -
+                form_groups:
+                  -
+                    field_type: password_input
+                    field_options:
+                      object_name: customer
+                      attr_name: password_confirmation
+                      error:
+                        client:
+                          text: Password Confirmation must match Password
+                      hide_conditions:
+                        - "requirements['customer.password']['hide']"
+                      label:
+                        text: Password Confirmation
+          # income: income_type
+          -
+            element_type: fieldset
+            form_rows:
+              -
+                form_groups:
+                  -
+                    field_type: 'select_input'
+                    field_options:
+                      object_name: 'income'
+                      attr_name: 'income_type'
+                      error:
+                        client:
+                          text: 'Please select your income type'
+                      label:
+                        text: 'Income Type'
+                      option_tags:
+                        ruby_eval_key: income_types
+          # income: time_at_job
+          -
+            element_type: fieldset
+            always_show_child_fields: true
+            is_grouped_radio: true
+            attrs:
+              ng-hide: "income.income_type != 'employment'"
+            form_rows:
+              -
+                row_label:
+                  text: 'How long have you worked here?'
+                form_groups:
+                  -
+                    field_type: 'radio_input'
+                    field_options:
+                      object_name: 'income'
+                      attr_name: 'time_at_job'
+                      radio_buttons:
+                        -
+                          label:
+                            text: 'Less than 6 months'
+                          value: '6'
+                        -
+                          label:
+                            text: '6 months or more'
+                          value: '7'
+                      error:
+                        client:
+                          text: Please select how long you've been at your job
+          # customer_application_metadata: time_self_employed
+          -
+            element_type: fieldset
+            always_show_child_fields: true
+            is_grouped_radio: true
+            attrs:
+              ng-hide: "income.income_type != 'self_employment'"
+            form_rows:
+              -
+                row_label:
+                  text: 'How long have you been self-employed?'
+                form_groups:
+                  -
+                    field_type: 'radio_input'
+                    field_options:
+                      object_name: 'customer_application_metadata'
+                      attr_name: 'time_self_employed'
+                      radio_buttons:
+                        -
+                          label:
+                            text: '0-23 months'
+                          value: '23'
+                        -
+                          label:
+                            text: '24+ months'
+                          value: '24'
+                      error:
+                        client:
+                          text: Please select how long you've been self-employed
+          # person: ssn
+          -
+            element_type: fieldset
+            form_rows:
+              -
+                form_groups:
+                  -
+                    field_type: 'ssn_input'
+                    field_options:
+                      object_name: person
+                      attr_name: ssn
+                      error:
+                        client:
+                          text: 'What is your 9-digit social security number?'
+                        server:
+                          preexisting:
+                            server_message:
+                              text: 'The social security number you entered has already been used.'
+                            client_message:
+                              text: 'It looks like you have an existing account. In order to continue, please reset your password using the link below:'
+                            link:
+                              href: '/apply/send_recovery_email?field=ssn'
+                              text: 'Click here to recover your old account'
+                      label:
+                        text: 'Social Security Number'
+                      caption:
+                        template:
+                          text: We use 128-bit SSL protection and strict, high levels of security &amp; encryption standards to keep your information safe. %{more_info}
+                          data:
+                            more_info:
+                              link_text: More Information
+                              link_type: tooltip
+                              link_content: We use your social security number to help verify your information to issue credit. We also encrypt this information to keep you safe
+          # income: monthly_net_income
+          -
+            element_type: fieldset
+            form_rows:
+              -
+                form_groups:
+                  -
+                    field_type: 'text_input'
+                    field_options:
+                      object_name: 'income'
+                      attr_name: 'monthly_net_income'
+                      caption:
+                        text: 'Monthly Net Income is your income each month AFTER all taxes and deductions. Alimony, child support, or separate maintenance income need not be revealed if you do not wish to have it considered as a basis for repaying this loan.'
+                      error:
+                        client:
+                          text: 'What is your net income per month?'
+                      input_attrs:
+                        type: 'tel'
+                        class: 'form__input--dollar'
+                      label:
+                        text: 'Monthly Net Income'
+          # customer_application: loan_purpose
+          -
+            element_type: fieldset
+            form_rows:
+              -
+                form_groups:
+                  -
+                    field_type: 'select_input'
+                    field_options:
+                      object_name: 'customer_application'
+                      attr_name: 'loan_purpose'
+                      error:
+                        client:
+                          text: 'Select the purpose of this loan'
+                      label:
+                        text: "What's this loan for?"
+                      option_tags:
+                        ruby_eval_key: loan_purposes
+          # customer_application_metadata: home_improvement_property_type, home_improvement_owner_occupancy, home_improvement_address_same_as_application
+          -
+            element_type: fieldset
+            stackable: true
+            attrs:
+              ng-hide: customer_application.loan_purpose !== 'Home Improvement'
+            form_rows:
+              -
+                form_groups:
+                  -
+                    field_type: select_input
+                    field_options:
+                      object_name: customer_application_metadata
+                      attr_name: home_improvement_property_type
+                      error:
+                        client:
+                          text: What is the property type?
+                      option_tags:
+                        ruby_eval_key: property_types
+                      label:
+                        text: Property Type
+              -
+                form_groups:
+                  -
+                    field_type: select_input
+                    field_options:
+                      object_name: customer_application_metadata
+                      attr_name: home_improvement_owner_occupancy
+                      error:
+                        client:
+                          text: Please enter your owner occupancy
+                      option_tags:
+                        ruby_eval_key: occupancy_types
+                      label:
+                        text: Owner Occupancy
+              -
+                form_groups:
+                  -
+                    field_type: select_input
+                    field_options:
+                      object_name: customer_application_metadata
+                      attr_name: home_improvement_address_same_as_application
+                      error:
+                        client:
+                          text: Please enter your address that is being improved
+                      option_tags:
+                        ruby_eval_key: same_address_responses
+                      label:
+                        text: Address That Is Being Improved
+          # customer_application_metadata: home_improvement_address_1, home_improvement_address_2
+          -
+            element_type: fieldset
+            attrs:
+              ng-hide: customer_application_metadata.home_improvement_address_same_as_application !== 'no' || customer_application.loan_purpose !== 'Home Improvement'
+            form_rows:
+              -
+                form_groups:
+                  -
+                    field_type: text_input
+                    field_options:
+                      object_name: customer_application_metadata
+                      attr_name: home_improvement_address_1
+                      address_autocomplete_enabled: false
+                      error:
+                        client:
+                          text: What is the address that is being improved?
+                      label:
+                        text: Address Line 1
+              -
+                form_groups:
+                  -
+                    field_type: text_input
+                    field_options:
+                      object_name: customer_application_metadata
+                      attr_name: home_improvement_address_2
+                      address_autocomplete_enabled: false
+                      label:
+                        text: Address Line 2
+                        optional: true
+          # customer_application_metadata: home_improvement city, state, zip
+          -
+            element_type: fieldset
+            attrs:
+              ng-hide: customer_application_metadata.home_improvement_address_same_as_application !== 'no' || customer_application.loan_purpose !== 'Home Improvement'
+            form_rows:
+              -
+                form_groups:
+                  -
+                    field_type: text_input
+                    field_options:
+                      object_name: customer_application_metadata
+                      attr_name: home_improvement_city
+                      error:
+                        client:
+                          text: In what city?
+                      label:
+                        text: City
+                  -
+                    field_type: select_input
+                    field_options:
+                      object_name: customer_application_metadata
+                      attr_name: home_improvement_state
+                      error:
+                        client:
+                          text: In what state?
+                      label:
+                        text: State
+                      option_tags:
+                        ruby_eval_key: states
+                  -
+                    field_type: text_input
+                    field_options:
+                      object_name: customer_application_metadata
+                      attr_name: home_improvement_zip
+                      error:
+                        client:
+                          text: In what zip code?
+                      label:
+                        text: Zip
+          # customer_application_metadata: home_improvement_ethnicity, home_improvement_race, home_improvement_gender
+          -
+            element_type: fieldset
+            attrs:
+              ng-hide: customer_application_metadata.home_improvement_address_same_as_application !== 'no' || customer_application.loan_purpose !== 'Home Improvement'
+            form_rows:
+              -
+                form_groups:
+                  -
+                    field_type: select_input
+                    field_options:
+                      object_name: customer_application_metadata
+                      attr_name: home_improvement_ethnicity
+                      error:
+                        client:
+                          text: What is your ethnicity?
+                      option_tags:
+                        ruby_eval_key: ethnicities
+                      label:
+                        text: Ethnicity
+              -
+                form_groups:
+                  -
+                    field_type: multiple_checkboxes
+                    field_options:
+                      object_name: customer_application_metadata
+                      attr_name: home_improvement_race
+                      error:
+                        client:
+                          text: What is your race?
+                      label:
+                        text: Race (Check all that apply)
+                      checkboxes:
+                        angular_array: raceValues
+                        selected_array: selectedRaceValues
+              -
+                form_groups:
+                  -
+                    field_type: select_input
+                    field_options:
+                      object_name: customer_application_metadata
+                      attr_name: home_improvement_gender
+                      error:
+                        client:
+                          text: What is your gender?
+                      option_tags:
+                        ruby_eval_key: genders
+                      label:
+                        text: Gender
+          # customer_application_metadata: requested_loan_amount
+          -
+            element_type: fieldset
+            form_rows:
+              -
+                form_groups:
+                  -
+                    field_type: 'text_input'
+                    field_options:
+                      object_name: 'customer_application_metadata'
+                      attr_name: 'requested_loan_amount'
+                      caption:
+                        text: 'Please enter an amount between $1,000 and $35,000. This is not final.'
+                      error:
+                        client:
+                          text: 'Please enter your requested loan amount.'
+                      input_attrs:
+                        type: 'tel'
+                        class: 'form__input--dollar'
+                        placeholder: '1,000 - 35,000'
+                      label:
+                        text: 'How much do you need?'
+          # promotion: code
+          -
+            element_type: fieldset
+            stackable: true
+            label:
+              attrs:
+                for: new_promotion_coupon_code
+              text: Promotional Code
+              sublabel:
+                text: or Letter Personal Offer Code
+            form_rows:
+              -
+                form_groups:
+                  -
+                    field_type: promo_code_input
+                    field_options:
+                      object_name: 'new_promotion'
+                      attr_name: 'coupon_code'
+                      error:
+                        client:
+                          text: The promotional code must only contain letters and numbers.
+              -
+                form_groups:
+                  -
+                    field_type: promo_code_button
+                    field_options:
+                      object_name: 'new_promotion'
+                      attr_name: 'coupon_code_button'
+                      button:
+                        text: Apply Promo Code
+
+          # Customer consents
+          -
+            element_type: consents
+            preconsent_message:
+              text: We'll do our very best to help you achieve your dreams.
+            sections:
+              -
+                section_type: text
+                field_options:
+                  label:
+                    text: 'By clicking on the "Agree and Get Your Rates" button, I agree to the following:'
+              -
+                section_type: li
+                consents:
+                  -
+                    field_options:
+                      label:
+                        template:
+                          text: I consent to the Credit Report Authorization as specified %{here}.
+                          data:
+                            here:
+                              link_text: 'here'
+                              link_type: 'modal'
+                              link_target: 'eloan/credit_report_authorization'
+                    hidden_inputs:
+                      -
+                        field_options:
+                          object_name: 'customer'
+                          attr_name: 'credit_report_authorization'
+                  -
+                    field_options:
+                      label:
+                        template:
+                          text: I agree to Eloan's %{terms_of_use} and %{privacy_policy}.
+                          data:
+                            terms_of_use:
+                              link_text: 'Terms of Use'
+                              link_type: 'modal'
+                              link_target: 'eloan/terms_of_use'
+                            privacy_policy:
+                              link_text: 'Privacy Policy'
+                              link_type: 'url'
+                              link_target: 'https://www.eloan.com/privacy-policy'
+                    hidden_inputs:
+                      -
+                        field_options:
+                          object_name: 'customer'
+                          attr_name: 'privacy_policy_consent'
+                      -
+                        field_options:
+                          object_name: 'customer_consent'
+                          attr_name: 'terms_of_use'
+                  -
+                    field_options:
+                      label:
+                        template:
+                          text: I agree to Avant's %{avant_terms_of_use} and %{avant_privacy_policy}.
+                          data:
+                            avant_terms_of_use:
+                              link_text: 'Terms of Use'
+                              link_type: 'modal'
+                              link_target: 'eloan/avant_terms_of_use'
+                            avant_privacy_policy:
+                              link_text: 'Privacy Policy'
+                              link_type: 'url'
+                              link_target: 'https://www.avant.com/privacy_notice'
+                    hidden_inputs:
+                      -
+                        field_options:
+                          object_name: 'customer_consent'
+                          attr_name: 'avant_terms_of_use'
+                      -
+                        field_options:
+                          object_name: 'customer_consent'
+                          attr_name: 'avant_privacy_policy'
+                      -
+                        field_options:
+                          object_name: 'customer_consent'
+                          attr_name: 'webbank_privacy_policy'
+                  -
+                    field_options:
+                      label:
+                        template:
+                          text: I consent to receive calls regarding my account as specified %{here}.
+                          data:
+                            here:
+                              link_text: 'here'
+                              link_type: 'modal'
+                              link_target: 'eloan/receive_calls'
+                    hidden_inputs:
+                      -
+                        field_options:
+                          object_name: 'customer_consent'
+                          attr_name: 'receive_calls_about_account'
+              -
+                section_type: checkbox
+                consents:
+                  -
+                    field_options:
+                      object_name: 'customer'
+                      attr_name: 'electronic_communications_consent'
+                      is_padded: true
+                      label:
+                        template:
+                          text: I consent to the electronic communications agreement specified %{here}
+                          data:
+                            here:
+                              link_text: here
+                              link_type: modal
+                              link_target: 'eloan/electronic_communications_consent'
+                    hidden_inputs:
+                      -
+                        field_options:
+                          object_name: 'customer_consent'
+                          attr_name: 'avant_ecc_agreement'
+                      -
+                        field_options:
+                          object_name: 'customer_consent'
+                          attr_name: 'share_personal_info_with_avant'
+                      -
+                        field_options:
+                          object_name: 'customer_consent'
+                          attr_name: 'share_personal_info_with_webbank'
+
+          # Submit button
+          -
+            element_type: submit_button
+            text: Agree and Get Your Rates
+            credit_score_disclaimer:
+              text: Checking your rates does not affect your credit score.
+      # Legal notices
+      -
+        non_step: true
+        elements:
+          -
+            element_type: legal_notices
+            sections:
+              - partial: patriot_act_disclosure
+              - partial: copyright_eloan

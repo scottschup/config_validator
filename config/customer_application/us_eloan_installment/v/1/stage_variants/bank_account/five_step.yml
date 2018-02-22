@@ -1,0 +1,16 @@
+---
+- :section: main
+  :fields:
+    :bank_account:
+      :routing_number:
+        :required: if_bank_account_required
+        :validation: regex
+        :parameter: "^[0-9]{9}$"
+      :account_number:
+        :required: if_bank_account_required
+      :account_number_confirmation:
+        :required: matching_account_number
+        :validation: matches_field
+        :parameter: bank_account.account_number
+      :account_type:
+        :required: if_bank_account_required

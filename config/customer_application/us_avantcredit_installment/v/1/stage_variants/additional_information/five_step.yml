@@ -1,0 +1,76 @@
+---
+- :section: main
+  :fields:
+    :income:
+      :time_at_job:
+        :required: false
+      :pay_frequency:
+        :required: true
+      :job_title:
+        :required: false
+    :employer:
+      :name:
+        :required: if_income_type_visible
+      :phone_number:
+        :required: if_income_type_visible
+      :phone_number_ext:
+        :required: false
+    :employer_address:
+      :address_1:
+        :required: if_income_type_visible
+      :address_2:
+        :required: false
+      :city:
+        :required: if_income_type_visible
+      :state:
+        :required: if_income_type_visible
+      :zip:
+        :required: if_income_type_visible
+    :retype_field:
+      :retype_ssn:
+        :required: if_retype_ssn_required
+        :validation: regex
+        :parameter: "^[0-9]{9}$"
+    :customer_application_metadata:
+      :credit_hard_pull_consent:
+        :required: true
+        :checkbox: true
+        :hide: false
+      :income_start_date:
+        :required: false
+      :income_start_date_month:
+        :required: if_missing_time_at_job
+      :income_start_date_year:
+        :required: if_missing_time_at_job
+      :industry:
+        :required: false
+        :free_text_entry_value: other
+        :values:
+          :admin_customer_service: Admin / Customer Service
+          :business_marketing_management: Business / Marketing / Management
+          :construction_real_estate: Construction / Real Estate
+          :education_library: Education / Library
+          :finance_insurance: Finance / Insurance
+          :food_hotel_services: Food or Hotel Services
+          :health_care: Health Care
+          :it_engineering_science: IT / Engineering / Science
+          :legal_government_military: Legal / Government / Military
+          :media_entertainment_sports: Media / Entertainment / Sports
+          :oil_gas_energy: Oil & Gas / Energy
+          :personal_social_services: Personal or Social Services
+          :police_fire_security: Police / Fire / Security
+          :sales_purchasing: Sales / Purchasing
+          :other: Other
+      :occupation:
+        :required: false
+        :conditional_field: customer_application_metadata.industry
+        :conditional_values: |
+          {"admin_customer_service":{"assistant":"Assistant","billing_collections":"Billing & Collections","cashier":"Cashier","customer_service_rep_teller":"Customer Service Rep / Teller","general_office_support":"General Office Support","order_fulfillment_support":"Order Fulfillment Support","payroll_support":"Payroll Support","receptionist":"Receptionist","secretary":"Secretary","supervisor_manager":"Supervisor / Manager","other":"Other"},"business_marketing_management":{"accountant_auditor":"Accountant / Auditor","analyst_business_finance":"Analyst - Business or Finance","analyst_other":"Analyst - Other","bookkeeper":"Bookkeeper","consultant":"Consultant","hr_specialist":"HR Specialist","manager_executive_gm":"Manager - Executive / GM","manager_other":"Manager - Other","marketing_specialist":"Marketing Specialist","pr_specialist":"PR Specialist","other_professional":"Other - Professional","other_skilled_administrative":"Other - Skilled / Administrative"},"construction_real_estate":{"agent_broker":"Agent / Broker","appraiser":"Appraiser","electrician_linesman":"Electrician / Linesman","field_service_technician":"Field Service Technician","hvac_technician":"HVAC Technician","laborer":"Laborer","machine_equipment_operator":"Machine or Equipment Operator","maintenance_custodian":"Maintenance / Custodian","plumber":"Plumber","professional":"Professional","property_manager":"Property Manager","repairer_mechanic":"Repairer / Mechanic","skilled_administrative":"Skilled / Administrative","supervisor_manager":"Supervisor / Manager"},"education_library":{"assistant_aide":"Assistant / Aide","college_professor":"College Professor","counselor":"Counselor","librarian_curator":"Librarian / Curator","principal_administrator":"Principal / Administrator","teacher_k12":"Teacher - K-12","teacher_special_education":"Teacher - Special Education","teacher_vocational":"Teacher - Vocational","other_professional":"Other - Professional","other_skilled_administrative":"Other - Skilled / Administrative","graduate_student_adjunct_faculty":"Graduate Student / Adjunct Faculty"},"finance_insurance":{"accountant":"Accountant","agent_broker":"Agent / Broker","analyst":"Analyst","appraiser":"Appraiser","claims_adjuster_investigator":"Claims Adjuster / Investigator","financial_advisor_investor":"Financial Advisor / Investor","loan_officer":"Loan Officer","supervisor_manager":"Supervisor / Manager","underwriter_actuary":"Underwriter / Actuary","other_professional":"Other - Professional","other_skilled_administrative":"Other - Skilled / Administrative"},"food_hotel_services":{"bartender":"Bartender","caterer":"Caterer","chef":"Chef","dishwasher":"Dishwasher","fast_food_worker":"Fast Food Worker","food_preparer_server":"Food Preparer / Server","manager_food_services":"Manager - Food Services","supervisor_food_services":"Supervisor - Food Services","other_food_services":"Other - Food Services","desk_clerk":"Desk Clerk","housekeeper_maid":"Housekeeper / Maid","manager_hotel_services":"Manager - Hotel Services","supervisor_hotel_services":"Supervisor - Hotel Services","other_hotel_services":"Other - Hotel Services"},"health_care":{"aide_attendant":"Aide / Attendant","assistant_technician_therapist":"Assistant / Technician / Therapist","chiropractor_podiatrist":"Chiropractor / Podiatrist","dentist_orthodontist":"Dentist / Orthodontist","doctor_surgeon":"Doctor / Surgeon","licensed_nurse":"Licensed Nurse (LPN)","paramedic_emt":"Paramedic / EMT","pharmacist":"Pharmacist","registered_nurse":"Registered Nurse (RN)","supervisor_manager_administrator":"Supervisor / Manager / Administrator","veterinarian":"Veterinarian","other_professional":"Other - Professional","other_skilled_administrative":"Other - Skilled / Administrative"},"it_engineering_science":{"administrator":"Administrator","analyst_engineering":"Analyst - Engineering","analyst_science":"Analyst - Science","computer_programmer":"Computer Programmer","supervisor_manager_it":"Supervisor / Manager - IT","technician_it":"Technician - IT","architect_drafter":"Architect / Drafter","engineer":"Engineer","scientist_researcher":"Scientist / Researcher","supervisor_manager_non_it":"Supervisor / Manager - Non-IT","technician_non_it":"Technician - Non-IT","other_professional":"Other - Professional","other_skilled_administrative":"Other - Skilled / Administrative"},"legal_government_military":{"auditor_analyst_examiner":"Auditor / Analyst / Examiner","lawyer_judge_mediator":"Lawyer / Judge / Mediator","legal_support_staff":"Legal Support Staff","military_enlisted_e1e4":"Military - Enlisted (E1-E4)","military_officer_nco":"Military - Officer / NCO (E5-O10)","military_warrant_officer":"Military - Warrant Officer (W1-W5)","us_postal_worker":"US Postal Worker","supervisor_manager":"Supervisor / Manager","other_professional":"Other - Professional","other_skilled_administrative":"Other - Skilled / Administrative"},"media_entertainment_sports":{"artist_writer":"Artist / Writer","composer_director_producer":"Composer / Director / Producer","designer_photographer":"Designer / Photographer","editor":"Editor","fitness_trainer_instructor":"Fitness Trainer / Instructor","performer":"Performer","supervisor_manager":"Supervisor / Manager","other":"Other"},"oil_gas_energy":{"extraction_worker_rotary_drill_operator_plumber":"Extraction Worker / Rotary Drill Operator / Plumber","supervisor_manager":"Supervisor / Manager","truck_driver_heavy_tractor_trailer":"Truck Driver - Heavy & Tractor-Trailer","industrial_machinery_mechanic_wellhead_pumper":"Industrial Machinery Mechanic / Wellhead Pumper","accountant_bookkeeper_title_examiner":"Accountant / Bookkeeper / Title Examiner","engineer_scientist_professional":"Engineer / Scientist / Professional","other":"Other"},"personal_social_services":{"child_elderly_care_provider":"Child or Elderly Care Provider","clergy_program_director":"Clergy / Program Director","counselor":"Counselor","social_service_worker":"Social Service Worker","supervisor_manager":"Supervisor / Manager","cleaner_housekeeper":"Cleaner / Housekeeper","dry_cleaning_laundry_servicer":"Dry Cleaning / Laundry Servicer","hair_personal_care_provider":"Hair / Personal Care Provider","pet_servicer_provider":"Pet Servicer Provider","psycologist_therapist":"Psycologist / Therapist","other_professional":"Other - Professional","other_skilled_administrative":"Other - Skilled / Administrative"},"police_fire_security":{"correctional_probation_officer":"Correctional or Probation Officer","detective_investigator":"Detective / Investigator","firefighter":"Firefighter","police_highway_patrol_sheriff":"Police / Highway Patrol / Sheriff","security_guard":"Security Guard","supervisor_manager":"Supervisor / Manager","other":"Other"},"sales_purchasing":{"account_executive":"Account Executive","agent_broker":"Agent / Broker","finance_insurance_real_estate_rep":"Finance / Insurance / Real Estate Rep","manufacturing_rep":"Manufacturing Rep","retail_salesperson":"Retail Salesperson","supervisor_manager_retail":"Supervisor / Manager - Retail","supervisor_manager_non_retail":"Supervisor / Manager - Non-Retail","vehicel_equipment_rental_rep":"Vehicle / Equipment Rental Rep","wholesale_rep":"Wholesale Rep","other":"Other"}}
+      :education:
+        :required: false
+        :values:
+          :10_graduate: Graduate
+          :20_bachelor: Bachelor's
+          :30_associate: Associate's
+          :40_high_school: High School
+          :50_some_high_school: Some High School or Below

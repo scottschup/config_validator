@@ -1,0 +1,309 @@
+components:
+  - header
+  - form
+  - sidebar
+component_configs:
+  header:
+    sections:
+      -
+        elements:
+          -
+            element_type: title
+            text: Last step before verifying your information.
+          -
+            element_type: subtitle
+            text: Please provide information about your income before completing your application and continuing.
+  form:
+    use_counters: true
+    sections:
+      -
+        label: 
+          increment_counter: true
+          text: Your income information
+        elements:
+          -
+            element_type: show_in_array_section
+            errors_requirements_array:
+              - employer.name
+              - employer.phone_number
+              - employer.phone_number_ext
+              - employer_address.address_1
+              - employer_address.address_2
+              - employer_address.city
+              - employer_address.state
+              - employer_address.zip
+              - customer_application_metadata.income_start_date
+              - customer_application_metadata.industry
+              - customer_application_metadata.occupation
+            fieldsets:
+              # employer: name
+              -
+                element_type: fieldset
+                form_rows:
+                  -
+                    form_groups:
+                      -
+                        field_type: 'text_input'
+                        field_options:
+                          object_name: 'employer'
+                          attr_name: 'name'
+                          label:
+                            text: 'Company Name'
+                          error:
+                            client:
+                              text: "Please fill in your employer's company name"
+              # customer_application_metadata: industry
+              -
+                element_type: fieldset
+                form_rows:
+                  -
+                    form_groups:
+                      -
+                        field_type: select_input
+                        field_options:
+                          object_name: customer_application_metadata
+                          attr_name: industry
+                          label:
+                            text: Industry
+                          option_tags:
+                            angular_eval: page_requirements[0].fields.customer_application_metadata.industry.values
+                          input_attrs:
+                            ng-change: setOccupationOptions(customer_application_metadata.industry); update('customer_application_metadata.industry');
+              # customer_application_metadata: occupation
+              - 
+                element_type: fieldset
+                form_rows:
+                  -
+                    row_attrs:
+                      ng-show: '!occupationOptionsEmpty()'
+                    form_groups:
+                      -
+                        field_type: select_input
+                        field_options:
+                          object_name: customer_application_metadata
+                          attr_name: occupation
+                          label:
+                            text: Occupation
+                          option_tags:
+                            angular_eval: occupation_options
+                  -
+                    row_attrs:
+                      ng-show: occupationOptionsEmpty()
+                    form_groups:
+                      -
+                        field_type: text_input
+                        field_options:
+                          object_name: customer_application_metadata
+                          attr_name: occupation
+                          label:
+                            text: Occupation
+              # employer_address: addres_1, address_2
+              -
+                element_type: fieldset
+                stackable: true
+                form_rows:
+                  -
+                    form_groups:
+                      -
+                        field_type: 'text_input'
+                        field_options:
+                          object_name: 'employer_address'
+                          attr_name: 'address_1'
+                          address_autocomplete_enabled: false # This should be on though, yeah?
+                          error:
+                            client:
+                              text: What is your employer's address?
+                          label:
+                            text: 'Employer Address Line 1'
+                  -
+                    form_groups:
+                      -
+                        field_type: 'text_input'
+                        field_options:
+                          object_name: 'employer_address'
+                          attr_name: 'address_2'
+                          address_autocomplete_enabled: false # This should be on though, yeah?
+                          label:
+                            text: 'Employer Address Line 2'
+                            optional: true
+              # employer_address: city, state, zip
+              -
+                element_type: fieldset
+                form_rows:
+                  -
+                    form_groups:
+                      -
+                        field_type: 'text_input'
+                        field_options:
+                          object_name: 'employer_address'
+                          attr_name: 'city'
+                          error:
+                            client:
+                              text: What is your employer's city?
+                          label:
+                            text: 'Employer City'
+                      -
+                        field_type: 'select_input'
+                        field_options:
+                          object_name: 'employer_address'
+                          attr_name: 'state'
+                          error:
+                            client:
+                              text: What is your employer's state?
+                          label:
+                            text: 'Employer State'
+                          option_tags:
+                            ruby_eval_key: states
+                      -
+                        field_type: 'text_input'
+                        field_options:
+                          object_name: 'employer_address'
+                          attr_name: 'zip'
+                          error:
+                            client:
+                              text: What is your employer's zip code?
+                          label:
+                            text: 'Employer Zip'
+              # employer: phone_number, phone_number_ext
+              -
+                element_type: fieldset
+                stackable: true
+                form_rows:
+                  -
+                    form_groups:
+                      -
+                        field_type: 'text_input'
+                        field_options:
+                          object_name: 'employer'
+                          attr_name: 'phone_number'
+                          error:
+                            client:
+                              text: What is your employer's phone number?
+                          label:
+                            text: "Employer's phone number"
+                  -
+                    form_groups:
+                      -
+                        field_type: 'text_input'
+                        field_options:
+                          object_name: 'employer'
+                          attr_name: 'phone_number_ext'
+                          label:
+                            text: 'Extension'
+                          placeholder: 'ext. (optional)'
+              # customer_application_metadata: income_start_date
+              -
+                element_type: fieldset
+                form_rows:
+                  -
+                    row_label:
+                      text: 'When did you start receiving your current source of income?'
+                      # TODO: How can we support switching on other values
+                      # %label.form__label.label.label--large{for: "customer_application_metadata_income_start_date", :"ng-hide" => "requirements['customer_application_metadata.income_start_date']['hide']"}
+                      #   %span{"ng-switch" => true, "on" => "income.income_type"}
+                      #     %span{"ng-switch-when" => "employment"}
+                      #       When did you begin working at your current job?
+                      #     %span{"ng-switch-when" => "self_employment"}
+                      #       When did you begin working at your current job?
+                      #     %span{"ng-switch-when" => "retired_benefits"}
+                      #       When did you begin receiving benefits?
+                      #     %span{"ng-switch-when" => "unemployment"}
+                      #       When did you begin receiving benefits?
+                      #     %span{"ng-switch-default" => true}
+                      #       When did you start receiving your current source of income?
+                    form_groups:
+                      -
+                        field_type: 'select_input'
+                        field_options:
+                          object_name: 'customer_application_metadata'
+                          attr_name: 'income_start_date_month'
+                          option_tags:
+                            ruby_eval_key: 'months'
+                          error:
+                            client:
+                              text: 'Please select a month and year'
+                      -
+                        field_type: 'select_input'
+                        field_options:
+                          object_name: 'income'
+                          attr_name: 'income_start_date_year'
+                          option_tags:
+                            ruby_eval_key: 'years_last_50'
+              # income: pay_frequency
+              -
+                element_type: fieldset
+                form_rows:
+                  -
+                    form_groups:
+                      -
+                        field_type: 'select_input'
+                        field_options:
+                          input_type: 'select_input'
+                          object_name: 'income'
+                          attr_name: 'pay_frequency'
+                          option_tags:
+                            ruby_eval_key: 'pay_frequency'
+                          label:
+                            text: 'How often are you paid?'
+                          error:
+                            client:
+                              text: Select how often you're paid.
+      -
+        label:
+          increment_counter: true
+          text: Fill out additional information
+        elements:
+          # customer_application_metadata: education
+          -
+            element_type: fieldset
+            form_rows:
+              -
+                form_groups:
+                  -
+                    field_type: select_input
+                    field_options:
+                      object_name: customer_application_metadata
+                      attr_name: education
+                      label:
+                        text: What is the highest level of education you have completed?
+                      option_tags:
+                        angular_eval: 'page_requirements[0].fields.customer_application_metadata.education.values'
+                      error:
+                        client:
+                          text: Please select an education level
+                      input_attrs:
+                        ng-selected: 'customer_application_metadata.education '
+
+          # Consents
+          -
+            element_type: consents
+            sections:
+              -
+                section_type: checkbox
+                consents:
+                  -
+                    field_options:
+                      object_name: 'customer_application_metadata'
+                      attr_name: 'credit_hard_pull_consent'
+                      is_padded: true
+                      label: 
+                        text: I understand that by clicking "Complete Application" a hard credit inquiry will be made to confirm my identity and evaluate my creditworthiness. This inquiry will be reflected on my credit report and may impact my credit score.
+
+      # Submit
+      -
+        non_step: true
+        elements:
+          -
+            element_type: submit_button
+            text: Complete Application
+
+      # Legal notices
+      -
+        non_step: true
+        elements:
+          -
+            element_type: legal_notices
+            sections:
+              - partial: patriot_act_disclosure
+              - partial: amazon_disclaimer
+              - partial: copyright

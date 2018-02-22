@@ -1,0 +1,100 @@
+apply:
+  additional_templates: []
+  assets:
+    scripts:
+      apply:
+        - common.js
+        - us_eloan_installment.js
+      basic:
+        - v3/steps
+        - v3/iovation
+        - avant-analytics
+    styles:
+      - new_us_eloan.css
+  include:
+    threat_matrix: true
+  layout: apply_layout
+  modals:
+    - loading
+    - sign_in
+    - eloan/contact_us
+    - eloan/credit_report_authorization
+    - eloan/terms_of_use
+    - eloan/avant_terms_of_use
+    - eloan/receive_calls
+    - eloan/electronic_communications_consent
+  page_templates:
+    - personal
+    - rates_terms
+    - contract
+    - bank_account
+    - additional_information
+    - home
+    - declined
+    - service_failure
+  ruby_eval:
+    days: options_for_day
+    income_types: income_type_values.unshift(['', 'null']).uniq
+    months: options_for_month
+    loan_purposes: Customer.loan_purpose_values.unshift(['', 'null'])
+    # TODO: figure out why self_credit_score_form_options produces so many ['', 'null'] and [nil, 'null'] elements
+    self_credit_scores: CustomerApplicationMetadataField.self_credit_score_form_options.reject { |el| el[0].nil? }.uniq
+    states: Address.states.map { |s| [s, s] }.unshift(['', 'null'])
+    years: options_for_year
+    years_last_50: options_for_last_years(50)
+    pay_frequency: options_for_select(pay_frequency_values.unshift([nil, '', {:'ng-value' => 'null'}]))
+    property_types: options_for_select([["1-4 Residential Units", "1_to_4_family"], ["Manufactured Housing (Factory built houses)", "manufactured_housing"], ["Multifamily (5 or more residential units)", "multifamily_5"]])
+    occupancy_types: options_for_select([["Owner Occupied", "owner_occupied"], ["Non Owner Occupied", "non_owner_occupied"]])
+    same_address_responses: options_for_select([['Same as application','yes'], ['Other', 'no']])
+    ethnicities: options_for_select([["Hispanic or Latino", "hispanic"], ["Not Hispanic or Latino", "not_hispanic"], ["I do not wish to furnish this information", "do_not_wish_to_furnish"]])
+    genders: options_for_select([["Male", "male"], ["Female", "female"], ["I do not wish to furnish this information", "do_not_wish_to_furnish"]])
+  shared_configs:
+    sidebar:
+      elements:
+        -
+          partial: security_and_privacy
+        -
+          partial: support_number
+          details:
+            phone_number: '855-854-9346'
+  page_configs:
+    declined:
+      template: splash_page
+      components:
+        - text_body
+      component_configs:
+        text_body:
+          sections:
+            -
+              elements:
+                -
+                  element_type: title
+                  text: Unfortunately, we cannot approve your loan application at this time.
+                -
+                  element_type: subtitle
+                  text: 'If you would like a written explanation of our credit decision, you can request one by writing to the address below:'
+                -
+                  element_type: address
+                  text_lines:
+                    - 'Attn: Eloan Customer Service'
+                    - Eloan
+                    - 222 N. LaSalle St., Suite 1700
+                    - Chicago, Illinois, 60601
+                -
+                  element_type: link
+                  url: http://www.eloan.com
+                  text: Return to Eloan.com
+    home:
+      components:
+        - text_body
+      component_configs:
+        text_body:
+          partial: home
+          title:
+            text: We appreciate your patience
+    service_failure:
+      components:
+        - text_body
+      component_configs:
+        text_body:
+          partial: service_failure

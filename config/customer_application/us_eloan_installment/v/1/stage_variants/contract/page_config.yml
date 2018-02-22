@@ -1,0 +1,284 @@
+components:
+  - header
+  - form
+  - sidebar
+component_configs:
+  header:
+    sections:
+      -
+        elements:
+          -
+            element_type: title
+            text: Confirm your loan details and sign agreement.
+          -
+            element_type: subtitle
+            attrs:
+              ng-hide: 'config.show_contract_at_end'
+            text: After signing the agreement and completing the rest of your application, you may be required to verify some of your information before receiving a final decision on your loan.
+  form:
+    use_counters: true
+    sections:
+      # Loan breakdown
+      -
+        loan_result: true
+        elements:
+          -
+            element_type: no_orig_fee_eloan
+            content:
+              text: Some lenders charge an upfront fee on the customer’s loan amount. At Eloan, we are proud to offer our loans without an origination fee.
+          -
+            element_type: loan_option_result
+            apr_popover:
+              template:
+                text: '%{tooltip}'
+                data:
+                  tooltip:
+                    link_icon: '#icon-exclamation-circle'
+                    link_type: tooltip
+                    link_content: 'APR is the total annual cost of the loan to the borrower, including any fees, expressed as a percentage. The APR of {{ loan.apr | ProductApr: 2 }}% reflects the interest rate of {{ loan.interest_rate | ProductApr: 2 }}%.'
+
+      # Spouse section
+      -
+        attrs:
+          ng-if: spouse_required
+        label: 
+          increment_counter: true
+          text: Do you have a spouse?
+          attrs:
+            for: spouse_exists
+        caption:
+          text: Wisconsin law requires that lenders notify a customer's spouse by mail for funded loans.
+        elements:
+          # spouse: exists
+          -
+            element_type: fieldset
+            always_show_child_fields: true
+            form_rows:
+              -
+                form_groups:
+                  -
+                    field_type: radio_input
+                    field_options:
+                      object_name: spouse
+                      attr_name: exists
+                      radio_buttons:
+                        -
+                          label:
+                            text: Yes, I do have a spouse
+                          value: true
+                        -
+                          label:
+                            text: No, I do not have a spouse
+                          value: false
+      -
+        attrs:
+          ng-hide: '!spouse.exists'
+        label:
+          text: "Please fill in your spouse's information:"
+          attrs:
+            for: spouse_first_name
+        elements:
+          # spouse: first_name, last_name
+          -
+            element_type: fieldset
+            stackable: true
+            attrs:
+              ng-hide: '!spouse.exists'
+            form_rows:
+              -
+                form_groups:
+                  -
+                    field_type: text_input
+                    field_options:
+                      object_name: spouse
+                      attr_name: first_name
+                      label:
+                        text: Spouse Name
+                      error:
+                        client:
+                          text: What is your spouse's first name?
+              -
+                form_groups:
+                  -
+                    field_type: text_input
+                    field_options:
+                      object_name: spouse
+                      attr_name: last_name
+                      label:
+                        text: Last Name
+                      error:
+                        client:
+                          text: What is your spouse's last name?
+          # spouse: address_1, address_2
+          -
+            element_type: fieldset
+            attrs:
+              ng-hide: '!spouse.exists'
+            stackable: true
+            form_rows:
+              -
+                form_groups:
+                  -
+                    field_type: text_input
+                    field_options:
+                      object_name: spouse
+                      attr_name: address_1
+                      address_autocomplete_enabled: false
+                      error:
+                        client:
+                          text: What is your spouse's address?
+                      label:
+                        text: Address Line 1
+              -
+                form_groups:
+                  -
+                    field_type: text_input
+                    field_options:
+                      object_name: spouse
+                      attr_name: address_2
+                      address_autocomplete_enabled: false
+                      label:
+                        text: Address Line 2
+                        optional: true
+          # spouse: city, state, zip
+          -
+            element_type: fieldset
+            attrs:
+              ng-hide: '!spouse.exists'
+            form_rows:
+              -
+                form_groups:
+                  -
+                    field_type: text_input
+                    field_options:
+                      object_name: spouse
+                      attr_name: city
+                      error:
+                        client:
+                          text: What is your spouse's city?
+                      label:
+                        text: City
+                  -
+                    field_type: select_input
+                    field_options:
+                      object_name: spouse
+                      attr_name: state
+                      error:
+                        client:
+                          text: What is your spouse's state?
+                      label:
+                        text: State
+                      option_tags:
+                        ruby_eval_key: states
+                  -
+                    field_type: text_input
+                    field_options:
+                      object_name: spouse
+                      attr_name: zip
+                      error:
+                        client:
+                          text: What is your spouse's zip code?
+                      label:
+                        text: Zip
+
+      # Payment method
+      -
+        step_disabled_condition: product.payment_method && !product.editingPaymentMethod
+        label:
+          increment_counter: true
+          text: Select one of these automatic repayment methods.
+          attrs:
+            ng-hide: product.payment_method && !product.editingPaymentMethod
+        elements:
+          -
+            element_type: payment_method
+            error:
+              client:
+                text: Please select your method of repayment. Automatic Debit is recommended.
+            payment_methods:
+              -
+                title:
+                  text: Electronic Fund Transfer (ACH)
+                recommended:
+                  text: RECOMMENDED
+                description:
+                  text: We electronically debit your bank account for the amount you owe on your loan payment due dates. You must provide the bank account information requested in order for us to debit your account.
+                value: ach
+                icon: ach
+              -
+                title:
+                  text: Remotely Created Check (RCC)
+                description:
+                  text: We debit your bank account for the amount you owe on your loan payment due dates by creating and submitting checks, bearing your typed name and other required information, instead of your handwritten signature.
+                value:  remotely_created_check
+                icon: rcc
+              -
+                title:
+                  text: Manual Payments
+                description:
+                  text: You mail paper checks to Eloan's billing address. Every check must be received on or before the date each payment is due. Checks must be made payable to Eloan. Note that you are responsible for covering all postage costs.
+                value: paper_check
+                icon: rcc
+
+      # Contract(s)
+      -
+        attrs:
+          ng-if: signed_all_contracts
+        label:
+          increment_counter: true
+          text: "You have already signed your contract{{ contracts.length > 1 ? 's' : '' }}"
+        step_disabled_condition: '!product.payment_method || product.editingPaymentMethod'
+        elements:
+          -
+            element_type: contracts
+            signed: true
+      -
+        attrs:
+          ng-if: '!signed_all_contracts'
+        label:
+          increment_counter: true
+          text: View and sign your contract
+        step_disabled_condition: '!product.payment_method || product.editingPaymentMethod'
+        elements:
+          -
+            element_type: contracts
+            signed: false
+            instructions:
+              attrs:
+                ng-hide: config.show_contract_at_end
+              text: Remember, you can pay off your loan at any time! There are never any pre-payment penalties. To view the full document, please scroll down.
+
+      # Sign Contract
+      -
+        attrs:
+          ng-if: '!signed_all_contracts'
+        label:
+          text: Sign your contract to receive your funds
+        step_disabled_condition: '!product.payment_method || product.editingPaymentMethod'
+        elements:
+          -
+            element_type: sign_contract
+
+      # Submit button
+      -
+        non_step: true
+        elements:
+          -
+            element_type: submit_button
+            pre_submit:
+              attrs:
+                ng-show: '!signed_all_contracts'
+              text: I AGREE that I have read all the applicable terms and conditions of the agreement above and consent to all terms.
+            attrs:
+              ng-click: submit(contracts[0])
+            text: "{{ signed_all_contracts ? 'Continue' : 'Sign Agreement' }}"
+
+      # Legal notices
+      -
+        non_step: true
+        elements:
+          -
+            element_type: legal_notices
+            sections:
+              - partial: patriot_act_disclosure
+              - partial: copyright_eloan

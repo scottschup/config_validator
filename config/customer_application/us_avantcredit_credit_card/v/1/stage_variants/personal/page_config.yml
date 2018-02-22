@@ -1,0 +1,323 @@
+components:
+  - header
+  - form
+  - sidebar
+component_configs:
+  header:
+    sections:
+      -
+        attrs:
+          ng-if: 'isOrganic'
+        elements:
+          -
+            element_type: title
+            text: Welcome! Let's get started to see if you qualify for an AvantCard.
+          -
+            element_type: subtitle
+            text: Checking to see if you qualify for an AvantCard <strong>does not affect your credit score</strong>.
+      -
+        attrs:
+          ng-if: '!isOrganic'
+        elements:
+          -
+            element_type: title
+            text: Welcome from {{ leadWelcomeInfo.leadProvider }}! Let's get started to see if you qualify for an AvantCard.
+          -
+            element_type: subtitle
+            text: Checking to see if you qualify for an AvantCard <strong>does not affect your credit score</strong>.
+  form:
+    use_counters: false
+    sections:
+      # PII
+      -
+        label:
+          text: Please tell us a little about yourself.
+          bold: true
+        elements:
+          # person: first_name, last_name
+          -
+            element_type: fieldset
+            form_rows:
+              -
+                form_groups:
+                  -
+                    field_type: 'text_input'
+                    field_options:
+                      object_name: 'person'
+                      attr_name: 'first_name'
+                      label:
+                        text: 'First Name'
+                      error:
+                        client:
+                          text: 'What is your first name?'
+                  -
+                    field_type: 'text_input'
+                    field_options:
+                      object_name: 'person'
+                      attr_name: 'last_name'
+                      label:
+                        text: 'Last Name'
+                      error:
+                        client:
+                          text: 'What is your last name?'
+          # person: date_of_birth
+          -
+            element_type: fieldset
+            form_rows:
+              -
+                row_label:
+                  text: 'Date of Birth'
+                form_groups:
+                  -
+                    field_type: 'select_input'
+                    field_options:
+                      object_name: 'person'
+                      attr_name: 'date_of_birth_month'
+                      error:
+                        client:
+                          text: 'Please select a month'
+                      option_tags:
+                        ruby_eval_key: months
+                  -
+                    field_type: 'select_input'
+                    field_options:
+                      object_name: 'person'
+                      attr_name: 'date_of_birth_day'
+                      error:
+                        client:
+                          text: 'Please select a day'
+                      option_tags:
+                        ruby_eval_key: days
+                  -
+                    field_type: 'select_input'
+                    field_options:
+                      object_name: 'person'
+                      attr_name: 'date_of_birth_year'
+                      error:
+                        client:
+                          text: 'Please select a year'
+                      input_attrs:
+                        ng-trim: false
+                      option_tags:
+                        ruby_eval_key: years
+          # person: ssn
+          -
+            element_type: fieldset
+            form_rows:
+              -
+                form_groups:
+                  -
+                    field_type: 'ssn_input'
+                    field_options:
+                      object_name: person
+                      attr_name: ssn
+                      label:
+                        text: 'Social Security Number'
+                      error:
+                        client:
+                          text: 'What is your 9-digit social security number?'
+                        server:
+                          preexisting:
+                            server_message:
+                              text: 'The social security number you entered has already been used.'
+                            client_message:
+                              text: 'It looks like you have an existing account. In order to continue, please reset your password using the link below:'
+                            link:
+                              href: '/apply/send_recovery_email?field=ssn'
+                              text: 'Click here to recover your old account'
+                row_caption:
+                  template:
+                    text: We use 128-bit SSL protection and strict, high levels of security &amp; encryption standards to keep your information safe. %{more_info}
+                    data:
+                      more_info:
+                        link_text: More Information
+                        link_type: tooltip
+                        link_content: We use your social security number to help verify your information to issue credit. We also encrypt this information to keep you safe
+          # TODO: change to phone_number and create phone_type input
+          # person: home_phone
+          -
+            element_type: fieldset
+            form_rows:
+              -
+                form_groups:
+                  -
+                    field_type: 'text_input'
+                    field_options:
+                      object_name: 'person'
+                      attr_name: 'home_phone'
+                      caption:
+                        text: We use your phone number to help confirm your identity.
+                      error:
+                        client:
+                          text: 'Please fill in your phone number'
+                      input_attrs:
+                        type: 'tel'
+                      label:
+                        text: 'Phone'
+      # Account creation and consents
+      -
+        label:
+          text: Create a login to save your progress and access your account.
+          bold: true
+        elements:
+          # customer: email
+          -
+            element_type: fieldset
+            hide_conditions: 
+              - "requirements['customer.electronic_communications_consent']['hide']"
+            form_rows:
+              -
+                form_groups:
+                  -
+                    field_type: 'text_input'
+                    field_options:
+                      object_name: 'customer'
+                      attr_name: 'email'
+                      error:
+                        client:
+                          text: 'Please enter a valid email'
+                        server:
+                          preexisting:
+                            partial: 'preexisting_email'
+                            server_message:
+                              text: An account already exists with this information, please reset your account password to continue.
+                            client_message:
+                              text: 'It looks like you have an existing account. In order to continue, please reset your password using the link below:'
+                            link:
+                              href: /apply/send_recovery_email?field=email
+                              text: Click here to recover your old account
+                      input_attrs:
+                        type: 'email'
+                      label:
+                        text: 'Email'
+          # customer: password, password_confirmation
+          -
+            element_type: fieldset
+            stackable: true
+            form_rows:
+              -
+                form_groups:
+                  -
+                    field_type: password_input
+                    field_options:
+                      object_name: customer
+                      attr_name: password
+                      error:
+                        client:
+                          text: Password must be at least {{ requirements['customer.password']['parameter'] }} characters
+                      label:
+                        text: Create Password
+              -
+                form_groups:
+                  -
+                    field_type: password_input
+                    field_options:
+                      object_name: customer
+                      attr_name: password_confirmation
+                      error:
+                        client:
+                          text: Password Confirmation must match Password
+                      hide_conditions:
+                        - "requirements['customer.password']['hide']"
+                      label:
+                        text: Password Confirmation
+
+          # customer consents
+          -
+            element_type: consents
+            hide_state_consents: true
+            sections:
+              -
+                section_type: checkbox
+                states_first: true
+                consents:
+                  -
+                    field_options:
+                      object_name: customer
+                      attr_name: electronic_communications_consent
+                      hide_conditions:
+                        - false
+                      is_padded: true
+                      label:
+                        text: '<strong>I read, understand, and consent to:</strong>'
+              -
+                section_type: li
+                consents:
+                  -
+                    field_options:
+                      label:
+                        template:
+                          text: Avant's %{avant_terms_of_use}
+                          data:
+                            avant_terms_of_use:
+                              link_text: Terms of Use
+                              link_type: modal
+                              link_target: terms_of_use
+                    hidden_inputs:
+                      -
+                        field_options:
+                          object_name: customer_consent
+                          attr_name: terms_of_use
+                  -
+                    field_options:
+                      label:
+                        template:
+                          text: '%{avant_privacy_policy} and %{webbank_privacy_policy}'
+                          data:
+                            avant_privacy_policy:
+                              link_text: Avant's Privacy Notice
+                              link_type: 'url'
+                              link_target: 'https://www.avant.com/privacy_notice'
+                            webbank_privacy_policy:
+                              link_text: WebBank's Privacy Notice
+                              link_type: 'url'
+                              link_target: 'https://www.avant.com/webbank_privacy_notice'
+                    hidden_inputs:
+                      -
+                        field_options:
+                          object_name: 'customer'
+                          attr_name: 'privacy_policy_consent'
+                  -
+                    field_options:
+                      label:
+                        template:
+                          text: '%{ecc_agreement}'
+                          data:
+                            ecc_agreement:
+                              link_text: Electronic Communications Agreement
+                              link_type: modal
+                              link_target: electronic_communications_consent
+                    # No hidden input needed here because checkbox has ecc info
+                  -
+                    field_options:
+                      label:
+                        template:
+                          text: '%{call_and_text}'
+                          data:
+                            call_and_text:
+                              link_text: Authorization to Receive Calls and SMS Messages
+                              link_type: modal
+                              link_target: call_and_text
+                    hidden_inputs:
+                      -
+                        field_options:
+                          object_name: customer_consent
+                          attr_name: receive_calls_about_account
+
+          # Submit button
+          -
+            element_type: submit_button
+            text: Continue to Application
+            credit_score_disclaimer:
+              text: Checking if you qualify for an AvantCard will not affect your credit score.
+      # Legal notices
+      -
+        non_step: true
+        elements:
+          -
+            element_type: legal_notices
+            sections:
+              - 
+                partial: patriot_act_disclosure
+              - 
+                partial: copyright

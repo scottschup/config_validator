@@ -1,0 +1,188 @@
+---
+- :section: main
+  :fields:
+    :customer_application:
+      :product_type:
+        :required: true
+      :loan_purpose:
+        :required: true
+    :customer_application_metadata:
+      :promo_code:
+        :required: false
+      :income_start_date:
+        :required: false
+      :income_start_date_month:
+        :required: if_missing_time_at_job
+      :income_start_date_year:
+        :required: if_missing_time_at_job
+      :time_self_employed:
+        :required: false
+      :home_improvement_property_type:
+        :required: if_home_improvement
+      :home_improvement_owner_occupancy:
+        :required: if_home_improvement
+      :home_improvement_address_same_as_application:
+        :required: if_home_improvement
+      :home_improvement_address_1:
+        :required: if_home_improvement_address_different
+      :home_improvement_city:
+        :required: if_home_improvement_address_different
+      :home_improvement_state:
+        :required: if_home_improvement_address_different
+      :home_improvement_zip:
+        :required: if_home_improvement_address_different
+      :home_improvement_ethnicity:
+        :required: if_home_improvement
+      :home_improvement_gender:
+        :required: if_home_improvement
+      :home_improvement_race:
+        :required: if_home_improvement
+        :validation: checkbox
+      :requested_loan_amount:
+        :required: true
+        :validation: regex
+        :parameter: "[0-9.,]+"
+    :customer:
+      :email:
+        :required: true
+        :lead_required: true
+        :validation: email
+      :password:
+        :required: true
+        :parameter: 8
+        :validation: min_length
+        :persist: false
+      :password_confirmation:
+        :required: matching_password
+        :validation: matches_field
+        :parameter: customer.password
+        :persist: false
+      :credit_report_authorization:
+        :required: true
+        :checkbox: true
+      :electronic_communications_consent:
+        :required: true
+        :checkbox: true
+      :privacy_policy_consent:
+        :required: true
+        :checkbox: true
+    :person:
+      :first_name:
+        :required: true
+        :lead_required: true
+        :disabled: if_preapproved
+      :last_name:
+        :required: true
+        :lead_required: true
+        :disabled: if_preapproved
+      :date_of_birth:
+        :required: false
+        :lead_required: true
+      :date_of_birth_month:
+        :required: true
+        :validation: not_null
+      :date_of_birth_day:
+        :required: true
+        :validation: not_null
+      :date_of_birth_year:
+        :required: true
+        :validation: not_null
+      :home_phone:
+        :required: true
+        :lead_required: true
+        :validation: regex
+        :parameter: "^\\s*(?:\\+?(\\d{1,3}))?[-. (]*(\\d{3})[-. )]*(\\d{3})[-. ]*(\\d{4})(?:
+          *x(\\d+))?\\s*$"
+      :mobile_phone:
+        :required: false
+      :ssn:
+        :required: true
+        :validation: regex
+        :parameter: "^[0-9]{9}$"
+        :lead_required: true
+    :customer_address:
+      :address_1:
+        :required: true
+        :lead_required: true
+        :disabled: if_preapproved
+      :address_2:
+        :required: false
+        :disabled: if_preapproved
+      :city:
+        :required: true
+        :validation: regex
+        :parameter: "^([a-zA-Z\x80-ɏ]+(?:. |-| |'))*[a-zA-Z\x80-ɏ]*$"
+        :lead_required: true
+        :disabled: if_preapproved
+      :state:
+        :required: true
+        :validation: not_null
+        :lead_required: true
+        :disabled: if_preapproved
+      :zip:
+        :required: true
+        :lead_required: true
+        :disabled: if_preapproved
+      :military_region:
+        :required: if_military_address
+      :military_address:
+        :required: false
+      :monthly_housing_payment:
+        :required: true
+        :validation: regex
+        :parameter: "^[0-9.,*]{1,9}$"
+      :rent_or_own:
+        :required: true
+        :lead_required: true
+    :income:
+      :income_type:
+        :required: true
+        :lead_required: true
+      :monthly_net_income:
+        :required: true
+        :validation: regex
+        :parameter: "^[0-9.,]+$"
+        :lead_required: true
+      :time_at_job:
+        :required: false
+    :customer_consent:
+      :terms_of_use:
+        :required: true
+        :checkbox: true
+      :nm_consumer_information:
+        :required: if_customer_certain_state
+        :state: NM
+        :checkbox: true
+      :il_consumer_information:
+        :required: if_customer_certain_state
+        :state: IL
+        :checkbox: true
+      :de_consumer_information:
+        :required: if_customer_certain_state
+        :state: DE
+        :checkbox: true
+      :sc_consumer_information:
+        :required: if_customer_certain_state
+        :state: SC
+        :checkbox: true
+      :avant_terms_of_use:
+        :required: true
+        :checkbox: true
+      :avant_ecc_agreement:
+        :required: true
+        :checkbox: true
+      :avant_privacy_policy:
+        :required: true
+        :checkbox: true
+      :webbank_privacy_policy:
+        :required: true
+        :checkbox: true
+      :share_personal_info_with_avant:
+        :required: true
+        :checkbox: true
+      :share_personal_info_with_webbank:
+        :required: true
+        :checkbox: true
+      :receive_calls_about_account:
+        :required: true
+        :checkbox: true

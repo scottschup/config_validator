@@ -1,0 +1,78 @@
+template: splash_page
+components:
+  - header
+  - text_body
+component_configs:
+  header:
+    partial: splash_header
+    sections:
+      -
+        elements:
+          -
+            element_type: title
+            text: Congratulations!<br />You are just a few steps away from receiving your AvantCard.
+  text_body:
+    sections:
+      # Rates
+      -
+        partial: credit_card/rates_section
+        elements:
+          -
+            element_type: avant_card_image
+          -
+            element_type: rates
+            rates:
+              -
+                highlight: true
+                label:
+                  text: Credit Limit
+                value:
+                  text: '{{ product.credit_line_amount | ProductMoney: config:0 }}'
+              -
+                label:
+                  text: Purchase APR
+                value:
+                  text: '{{ product.apr | ProductApr: 2 }}%'
+              -
+                label:
+                  text: Annual Fee
+                value:
+                  text: '{{ product.annual_membership_fee_amount | ProductMoney: config:0 }}'
+      # Terms
+      -
+        partial: credit_card/terms_section
+        elements:
+          -
+            element_type: terms
+            terms:
+              text: In order to issue you a card, we first need you to confirm your email address.
+          -
+            element_type: consents
+            sections:
+              -
+                section_type: checkbox
+                hide_state_consents: true
+                hide_conditions:
+                  - false
+                consents:
+                  -
+                    field_options:
+                      object_name: customer_application_metadata
+                      attr_name: credit_hard_pull_consent
+                      is_padded: true
+                      label:
+                        template:
+                          text: I consent to the Credit Report Pull Authorization as specified %{here}. I specifically direct WebBank and Avant to use consumer reports to consider me for other credit products offered by WebBank if not approved for a loan and I satisfy eligibility criteria for the type of credit that may be offered.
+                          data:
+                            here:
+                              link_text: 'here'
+                              link_type: 'modal'
+                              link_target: 'credit_report_authorization'
+      # CTA
+      -
+        partial: credit_card/cta
+        button:
+          disable_icons: true
+          attrs:
+            class: button-inline
+          text: Send Confirmation Email and Continue

@@ -1,0 +1,159 @@
+---
+- :section: main
+  :fields:
+    :customer_application:
+      :product_type:
+        :required: true
+      :loan_purpose:
+        :required: true
+    :customer_application_metadata:
+      :acquisition_channel:
+        :required: false
+      :promo_code:
+        :required: false
+      :requested_loan_amount:
+        :required: true
+        :validation: regex
+        :parameter: "[0-9.,]+"
+      :self_credit_score:
+        :required: true
+      :address_start_date:
+        :required: false
+      :address_start_date_month:
+        :required: true
+        :validation: not_null
+      :address_start_date_year:
+        :required: true
+        :validation: not_null
+    :customer:
+      :email:
+        :required: true
+        :lead_required: true
+        :validation: email
+      :password:
+        :required: true
+        :parameter: 6
+        :validation: min_length
+        :persist: false
+      :password_confirmation:
+        :required: matching_password
+        :validation: matches_field
+        :parameter: customer.password
+        :persist: false
+      :credit_report_authorization:
+        :required: true
+        :checkbox: true
+      :marketing_material:
+        :required: false
+        :checkbox: true
+        :hide: true
+      :electronic_communications_consent:
+        :required: true
+        :checkbox: true
+        :force_show: true
+      :privacy_policy_consent:
+        :required: true
+        :checkbox: true
+    :person:
+      :first_name:
+        :required: true
+        :lead_required: true
+        :disabled: if_preapproved
+      :last_name:
+        :required: true
+        :lead_required: true
+        :disabled: if_preapproved
+      :date_of_birth:
+        :required: false
+        :lead_required: true
+      :date_of_birth_month:
+        :required: true
+        :validation: not_null
+      :date_of_birth_day:
+        :required: true
+        :validation: not_null
+      :date_of_birth_year:
+        :required: true
+        :validation: not_null
+      :home_phone:
+        :required: true
+        :lead_required: true
+        :validation: regex
+        :parameter: "^\\s*(?:\\+?(\\d{1,3}))?[-. (]*(\\d{3})[-. )]*(\\d{3})[-. ]*(\\d{4})(?:
+          *x(\\d+))?\\s*$"
+      :mobile_phone:
+        :required: false
+      :ssn:
+        :required: true
+        :validation: regex
+        :parameter: "^[0-9]{9}$"
+        :lead_required: true
+    :customer_address:
+      :address_1:
+        :required: true
+        :lead_required: true
+        :disabled: if_preapproved
+      :address_2:
+        :required: false
+        :disabled: if_preapproved
+      :rent_or_own:
+        :required: true
+        :force_show: true
+        :lead_required: true
+      :monthly_housing_payment:
+        :required: true
+        :force_show: true
+        :validation: regex
+        :parameter: "^(\\d+(\\.|\\,)?\\d*|\\.\\d+)$"
+      :city:
+        :required: true
+        :validation: regex
+        :parameter: "^([a-zA-Z\x80-ɏ]+(?:. |-| |'))*[a-zA-Z\x80-ɏ]*$"
+        :lead_required: true
+        :disabled: if_preapproved
+      :state:
+        :required: true
+        :validation: not_null
+        :lead_required: true
+        :disabled: if_preapproved
+      :zip:
+        :required: true
+        :lead_required: true
+        :disabled: if_preapproved
+      :military_region:
+        :required: if_military_address
+      :military_address:
+        :required: false
+      :time_at_address:
+        :required: false
+        :lead_required: false
+    :income:
+      :income_type:
+        :required: true
+        :lead_required: true
+      :monthly_net_income:
+        :required: true
+        :validation: regex
+        :parameter: "^[0-9.,]+$"
+        :lead_required: true
+      :additional_household_income:
+        :required: false
+        :validation: regex
+        :parameter: "^[0-9.,]+$"
+    :customer_consent:
+      :nm_consumer_information:
+        :required: if_customer_certain_state
+        :state: NM
+        :checkbox: true
+      :il_consumer_information:
+        :required: if_customer_certain_state
+        :state: IL
+        :checkbox: true
+      :de_consumer_information:
+        :required: if_customer_certain_state
+        :state: DE
+        :checkbox: true
+      :sc_consumer_information:
+        :required: if_customer_certain_state
+        :state: SC
+        :checkbox: true

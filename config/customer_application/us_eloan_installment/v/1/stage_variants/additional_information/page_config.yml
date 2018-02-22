@@ -1,0 +1,214 @@
+components:
+  - header
+  - form
+  - sidebar
+component_configs:
+  header:
+    sections:
+      -
+        elements:
+          -
+            element_type: title
+            text: Last step before verifying your information.
+          -
+            element_type: subtitle
+            text: Please provide information about your income before completing your application and continuing.
+  form:
+    use_counters: false
+    sections:
+      -
+        label: 
+          text: Employer information
+        elements:
+          -
+            element_type: show_in_array_section
+            errors_requirements_array:
+              - employer.name
+              - income.income.job_title
+              - employer_address.address_1
+              - employer_address.address_2
+              - employer_address.city
+              - employer_address.state
+              - employer_address.zip
+              - employer.phone_number
+              - employer.phone_number_ext
+            fieldsets:
+              # employer: name; income: job_title
+              -
+                element_type: fieldset
+                stackable: true
+                form_rows:
+                  -
+                    form_groups:
+                      -
+                        field_type: text_input
+                        field_options:
+                          object_name: employer
+                          attr_name: name
+                          label:
+                            text: Company Name
+                          error:
+                            client:
+                              text: Please fill in your employer's company name
+                  -
+                    form_groups:
+                      -
+                        field_type: text_input
+                        field_options:
+                          object_name: income
+                          attr_name: job_title
+                          label:
+                            text: Job Title
+                          error:
+                            client:
+                              text: Please fill in your job title
+              # employer_address: addres_1
+              -
+                element_type: fieldset
+                form_rows:
+                  -
+                    form_groups:
+                      -
+                        field_type: text_input
+                        field_options:
+                          object_name: employer_address
+                          attr_name: address_1
+                          address_autocomplete_enabled: false
+                          error:
+                            client:
+                              text: What is your employer's address?
+                          label:
+                            text: Address Line 1
+              # employer_address: address_2
+              -
+                element_type: fieldset
+                form_rows:
+                  -
+                    form_groups:
+                      -
+                        field_type: text_input
+                        field_options:
+                          object_name: employer_address
+                          attr_name: address_2
+                          address_autocomplete_enabled: false # This should be on though, yeah?
+                          label:
+                            text: Address Line 2
+                            optional: true
+              # employer_address: city, state, zip
+              -
+                element_type: fieldset
+                form_rows:
+                  -
+                    form_groups:
+                      -
+                        field_type: text_input
+                        field_options:
+                          object_name: employer_address
+                          attr_name: city
+                          error:
+                            client:
+                              text: What is your employer's city?
+                          label:
+                            text: City
+                      -
+                        field_type: select_input
+                        field_options:
+                          object_name: employer_address
+                          attr_name: state
+                          error:
+                            client:
+                              text: What is your employer's state?
+                          label:
+                            text: State
+                          option_tags:
+                            ruby_eval_key: states
+                      -
+                        field_type: text_input
+                        field_options:
+                          object_name: employer_address
+                          attr_name: zip
+                          error:
+                            client:
+                              text: What is your employer's zip code?
+                          label:
+                            text: Zip
+              # employer: phone_number, phone_number_ext
+              -
+                element_type: fieldset
+                stackable: true
+                form_rows:
+                  -
+                    form_groups:
+                      -
+                        field_type: text_input
+                        field_options:
+                          object_name: employer
+                          attr_name: phone_number
+                          error:
+                            client:
+                              text: What is your employer's phone number?
+                          label:
+                            text: Company Phone
+                  -
+                    form_groups:
+                      -
+                        field_type: text_input
+                        field_options:
+                          object_name: employer
+                          attr_name: phone_number_ext
+                          label:
+                            text: Extension
+                            optional: true
+                          placeholder: ext. (optional)
+              # income: pay_frequency
+              -
+                element_type: fieldset
+                form_rows:
+                  -
+                    form_groups:
+                      -
+                        field_type: select_input
+                        field_options:
+                          input_type: select_input
+                          object_name: income
+                          attr_name: pay_frequency
+                          option_tags:
+                            ruby_eval_key: pay_frequency
+                          label:
+                            text: How often are you paid?
+                          error:
+                            client:
+                              text: Select how often you're paid.
+
+          # Consents
+          -
+            element_type: consents
+            sections:
+              -
+                section_type: checkbox
+                consents:
+                  -
+                    field_options:
+                      object_name: customer_application_metadata
+                      attr_name: credit_hard_pull_consent
+                      is_padded: true
+                      label: 
+                        text: I understand that by clicking "Complete Application" a hard credit inquiry will be made to confirm my identity and evaluate my creditworthiness. This inquiry will be reflected on my credit report and may impact my credit score.
+
+      # Submit
+      -
+        non_step: true
+        elements:
+          -
+            element_type: submit_button
+            text: Complete Application
+
+      # Legal notices
+      -
+        non_step: true
+        elements:
+          -
+            element_type: legal_notices
+            sections:
+              - partial: patriot_act_disclosure
+              - partial: copyright_eloan

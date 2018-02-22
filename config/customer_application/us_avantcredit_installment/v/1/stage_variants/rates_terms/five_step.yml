@@ -1,0 +1,34 @@
+---
+- :section: main
+  :fields:
+    :customer_consent:
+      :nm_consumer_information:
+        :required: if_customer_certain_state
+        :state: NM
+        :checkbox: true
+      :il_consumer_information:
+        :required: if_customer_certain_state
+        :state: IL
+        :checkbox: true
+      :de_consumer_information:
+        :required: if_customer_certain_state
+        :state: DE
+        :checkbox: true
+      :sc_consumer_information:
+        :required: if_customer_certain_state
+        :state: SC
+        :checkbox: true
+    :customer:
+      :credit_report_authorization:
+        :required: true
+        :checkbox: true
+      :email_additional_offers:
+        :required: false
+        :checkbox: true
+        :hide: true
+      :electronic_communications_consent:
+        :required: true
+        :checkbox: true
+      :privacy_policy_consent:
+        :required: true
+        :checkbox: true

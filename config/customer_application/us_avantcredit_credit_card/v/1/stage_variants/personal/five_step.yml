@@ -1,0 +1,77 @@
+---
+- :section: main
+  :fields:
+    :customer_application:
+      :product_type:
+        :required: false
+    :customer_application_metadata:
+      :decline_offer_source_application_uuid:
+        :required: true
+        :required_for_source: credit_card_decline_path
+    :customer:
+      :email:
+        :required: true
+        :lead_required: true
+        :validation: email
+      :password:
+        :required: true
+        :parameter: 6
+        :validation: min_length
+        :persist: false
+      :password_confirmation:
+        :required: matching_password
+        :validation: matches_field
+        :parameter: customer.password
+        :persist: false
+      :email_additional_offers:
+        :required: false
+        :checkbox: true
+        :hide: true
+      :privacy_policy_consent:
+        :required: true
+        :checkbox: true
+        :hide: true
+      :electronic_communications_consent:
+        :required: true
+        :checkbox: true
+    :person:
+      :first_name:
+        :required: true
+        :lead_required: true
+        :disabled: if_preapproved
+      :last_name:
+        :required: true
+        :lead_required: true
+        :disabled: if_preapproved
+      :date_of_birth:
+        :required: false
+        :lead_required: true
+      :date_of_birth_month:
+        :required: true
+        :validation: not_null
+      :date_of_birth_day:
+        :required: true
+        :validation: not_null
+      :date_of_birth_year:
+        :required: true
+        :validation: not_null
+      :home_phone:
+        :required: true
+        :lead_required: true
+        :validation: regex
+        :parameter: "^\\s*(?:\\+?(\\d{1,3}))?[-. (]*(\\d{3})[-. )]*(\\d{3})[-. ]*(\\d{4})(?:
+          *x(\\d+))?\\s*$"
+      :mobile_phone:
+        :required: false
+      :ssn:
+        :required: true
+        :validation: regex
+        :parameter: "^[0-9]{9}$"
+        :lead_required: true
+    :customer_consent:
+      :terms_of_use:
+        :required: true
+        :checkbox: true
+      :receive_calls_about_account:
+        :required: true
+        :checkbox: false

@@ -1,0 +1,31 @@
+---
+- :section: main
+  :fields:
+    :income:
+      :pay_frequency:
+        :required: true
+      :job_title:
+        :required: false
+    :employer:
+      :name:
+        :required: if_income_type_visible
+      :phone_number:
+        :required: if_income_type_visible
+      :phone_number_ext:
+        :required: false
+    :employer_address:
+      :address_1:
+        :required: if_income_type_visible
+      :address_2:
+        :required: false
+      :city:
+        :required: if_income_type_visible
+      :state:
+        :required: if_income_type_visible
+      :zip:
+        :required: if_income_type_visible
+    :customer_application_metadata:
+      :credit_hard_pull_consent:
+        :required: true
+        :checkbox: true
+        :hide: false

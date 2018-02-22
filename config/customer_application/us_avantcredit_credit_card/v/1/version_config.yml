@@ -1,0 +1,107 @@
+apply:
+  renderer_version: 2
+  assets:
+    scripts:
+      apply:
+        - 'common.js'
+        - 'us_avantcredit_credit_card.js'
+      basic:
+        - 'v3/steps'
+        - 'v3/iovation'
+        - 'avant-analytics'
+    styles:
+      - 'new_us_avant.css'
+  include:
+    threat_matrix: true
+  layout: apply_layout
+  modals:
+    - 'call_and_text'
+    - 'credit_report_authorization'
+    - 'customer_end_user_agreement'
+    - 'electronic_communications_consent'
+    - 'loading'
+    - 'marketing_material' # ???
+    - 'privacy_notice'
+    - 'sign_in' # ???
+    - 'terms_of_use'
+    - 'upload_paystub' # ???
+  page_templates:
+    - home
+    - personal
+    - personal_continued
+    - rates_terms
+    - declined
+    - service_failure
+  ruby_eval:
+    days: 'options_for_day'
+    income_types: "income_type_values.unshift(['', 'null']).uniq"
+    months: 'options_for_month'
+    # TODO: figure out why self_credit_score_form_options produces so many ['', 'null'] and [nil, 'null'] elements
+    self_credit_scores: "CustomerApplicationMetadataField.self_credit_score_form_options.reject { |el| el[0].nil? }.uniq"
+    states: "Address.states.map { |s| [s, s] }.unshift(['', 'null'])"
+    years: 'options_for_year'
+    years_last_50: 'options_for_last_years(50)'
+    pay_frequency: "options_for_select(pay_frequency_values.unshift([nil, '', {:'ng-value' => 'null'}]))"
+    upload_types: 'options_for_select(Attachment.upload_types)'
+  shared_configs:
+    sidebar:
+      elements:
+        -
+          partial: why_avant_card
+        # Coming soon! (?)
+        # -
+        #   partial: trustpilot
+        -
+          partial: logos
+          details:
+            logos:
+              -
+                img_path: v3/icons/bbb.png
+                alt_text: Better Business Bureau
+              -
+                partial_path: digicert
+  page_configs:
+    declined:
+      template: splash_page
+      components:
+        - text_body
+        - footer
+      component_configs:
+        text_body:
+          sections:
+            -
+              elements:
+                -
+                  element_type: icon
+                -
+                  element_type: title
+                  text: Thank you for submitting your application for an AvantCard. We will email you within 24 hours with the decision on your application.
+                -
+                  element_type: avant_signature
+        footer:
+          elements:
+            -
+              partial: pixels
+    home:
+      components:
+        - text_body
+      component_configs:
+        text_body:
+          partial: home
+          title:
+            text: We appreciate your patience
+    service_failure:
+      template: splash_page
+      components:
+        - text_body
+        - footer
+      component_configs:
+        text_body:
+          partial: service_failure
+        footer:
+          elements:
+            -
+              partial: legal_notices
+              sections:
+                -
+                  partial: copyright

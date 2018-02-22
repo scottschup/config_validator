@@ -1,0 +1,191 @@
+components:
+  - header
+  - form
+  - sidebar
+component_configs:
+  header:
+    sections:
+      -
+        attrs: 
+          ng-if: 'lowBorrowRange()'
+        elements:
+          -
+            element_type: title
+            text: Thanks for checking your loan options. Please select an option below.
+          -
+            element_type: subtitle
+            text: 'You may be eligible for an APR as low as <strong>{{minimumApr() | ProductApr: 2}}%</strong> through {{ product.product_owner_display }}.'
+          -
+            element_type: subtitle
+            text: The rates below are conditional and may change based on information obtained during the completion of your application and verification process.
+      -
+        attrs: 
+          ng-if: '!lowBorrowRange()'
+        elements:
+          -
+            element_type: title
+            text: Thanks for checking your loan options. Please select an option below.
+          -
+            element_type: subtitle
+            text: 'You may be eligible for an amount up to <strong>{{ product.maximum_requestable_amount | ProductMoney : config }}</strong> through {{product.product_owner_display}}.'
+          -
+            element_type: subtitle
+            text: The rates below are conditional and may change based on information obtained during the completion of your application and verification process.
+  form:
+    use_counters: true
+    sections:
+      # Rates and terms
+      -
+        label:
+          increment_counter: true
+          text: Drag to choose a loan amount
+        attrs:
+          ng-hide: 'lowBorrowRange()'
+        non_step: true
+        elements:
+          -
+            element_type: loan_amount_slider
+      -
+        elements:
+          -
+            element_type: loan_breakdown
+      -
+        label:
+          increment_counter: true
+          text: Which loan option meets your needs?
+        elements:
+          -
+            element_type: loan_options
+            apr_popover:
+              template:
+                text: '%{tooltip}'
+                data:
+                  tooltip:
+                    link_type: tooltip
+                    link_icon: '#icon-exclamation-circle'
+                    link_content: 'APR is the total annual cost of the loan to the borrower, including any fees, expressed as a percentage. The APR of {{ loan.apr | ProductApr: 2 }}% reflects the interest rate of {{ loan.interest_rate | ProductApr: 2 }}%. Since additional costs such as the administration fee are factored into the calculation of the APR, the APR will typically be higher than the interest rate.'
+      # Customer consents
+      -
+        non_step: true
+        elements:
+          -
+            element_type: consents
+            sections:
+              -
+                section_type: li
+                consents:
+                  -
+                    field_options:
+                      label:
+                        template:
+                          text: I consent to the Credit Report Pull Authorization as specified %{here}. I specifically direct WebBank and Avant to use consumer reports to consider me for other credit products offered by WebBank if not approved for a loan and I satisfy eligibility criteria for the type of credit that may be offered.
+                          data:
+                            here:
+                              link_text: 'here'
+                              link_type: 'modal'
+                              link_target: 'credit_report_authorization'
+                    hidden_inputs:
+                      -
+                        field_options:
+                          object_name: 'customer'
+                          attr_name: 'credit_report_authorization'
+                  # The rest of these consents (including checkboxes) are duplicates from step 1; try to DRY up
+                  -
+                    field_options:
+                      label:
+                        template:
+                          text: I agree to Avant's %{avant_terms_of_use}, Avant's %{avant_privacy_policy}, and %{webbank_privacy_policy}.
+                          data:
+                            avant_terms_of_use:
+                              link_text: 'Terms of Use'
+                              link_type: 'modal'
+                              link_target: 'terms_of_use'
+                            avant_privacy_policy:
+                              link_text: 'Privacy Policy'
+                              link_type: 'url'
+                              link_target: 'https://www.avant.com/privacy_notice'
+                            webbank_privacy_policy:
+                              link_text: WebBank's Privacy Policy
+                              link_type: 'url'
+                              link_target: 'https://www.avant.com/webbank_privacy_notice'
+                    hidden_inputs:
+                      -
+                        field_options:
+                          object_name: 'customer'
+                          attr_name: 'privacy_policy_consent'
+                      -
+                        field_options:
+                          object_name: 'customer_consent'
+                          attr_name: 'terms_of_use'
+                  -
+                    field_options:
+                      hide_conditions:
+                        - "!customer_application.refinance"
+                      label:
+                        text: I consent to have the transaction history of my existing loan shared with Avant, its affiliates, and WebBank for the purpose of evaluating me for credit.
+                  -
+                    field_options:
+                      label:
+                        template:
+                          text: I consent to receive calls (including SMS text messages) from Avant regarding my account as specified %{here}.
+                          data:
+                            here:
+                              link_text: 'here'
+                              link_type: 'modal'
+                              link_target: 'call_and_text'
+                  -
+                      field_options:
+                        label:
+                          text: I expressly authorize Avant, its affiliates, and WebBank to share among them any transaction history related to my financial products or services received through Avant or serviced by Avant for the purpose of evaluating me for credit.
+              -
+                section_type: checkbox
+                consents:
+                  # We don't do marketing calls, so is this necessary? It's not required and hidden in five_step.yml
+                  # -
+                  #   field_options:
+                  #     hide_conditions:
+                  #       - true
+                  #     object_name: 'customer'
+                  #     attr_name: 'marketing_material'
+                  #     is_padded: true
+                  #     label:
+                  #       template:
+                  #         text: I consent to receive marketing related calls, including calls offering promotions and coupons, as stated %{here}.
+                  #         data:
+                  #           here:
+                  #             link_text: 'here'
+                  #             link_type: 'modal'
+                  #             link_target: 'marketing_material'
+                  -
+                    field_options:
+                      object_name: 'customer'
+                      attr_name: 'electronic_communications_consent'
+                      is_padded: true
+                      label:
+                        template:
+                          text: I consent to the electronic communications agreement specified %{here}.
+                          data:
+                            here:
+                              link_text: 'here'
+                              link_type: 'modal'
+                              link_target: 'electronic_communications_consent'
+      -
+        non_step: true
+        elements:
+          # Submit button
+          -
+            element_type: submit_button
+            text: Continue to Agreement
+            credit_score_disclaimer:
+              text: Continuing does not affect your credit score.
+
+      # Legal notices
+      -
+        non_step: true
+        elements:
+          -
+            element_type: legal_notices
+            sections:
+              - partial: patriot_act_disclosure
+              - partial: amazon_disclaimer
+              - partial: copyright

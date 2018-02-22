@@ -1,0 +1,42 @@
+:personal:
+  :five_step:
+    :weight: 1.00
+    :path: "stage_variants/personal/five_step.yml"
+  :single_field:
+    :weight: 0.00
+    :path: "stage_variants/personal/single_field.yml"
+    :exclude:
+      -
+        :type: 'browser'
+        :attributes:
+          :browser: 'Internet Explorer'
+          :version: '8.0'
+      -
+        :type: 'browser'
+        :attributes:
+          :browser: 'Internet Explorer'
+          :version: '9.0'
+      -
+        :type: 'customer_application'
+        :attributes:
+          :source: 'credit_karma_prefill'
+:rates_terms:
+  :five_step:
+    :weight: 1.00
+    :path: "stage_variants/rates_terms/five_step.yml"
+:contract:
+  :five_step:
+    :weight: 1.00
+    :path: "stage_variants/contract/five_step.yml"
+:bank_account:
+  :five_step:
+    :weight: 1.00
+    :path: "stage_variants/bank_account/five_step.yml"
+:additional_information:
+  :five_step:
+    :weight: 1.00
+    :path: "stage_variants/additional_information/five_step.yml"
+:completed:
+  :five_step:
+    :weight: 1.00
+    :path: "stage_variants/completed/five_step.yml"
