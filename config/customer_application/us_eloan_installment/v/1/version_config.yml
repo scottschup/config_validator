@@ -1,4 +1,5 @@
 apply:
+  renderer_version: 3
   additional_templates: []
   assets:
     scripts:

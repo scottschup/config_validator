@@ -1,5 +1,7 @@
 :active_versions:
   :object_class: Array
+  :value_types:
+    - Fixnum
   :allowed_min: 1
   :allowed: 
     - 1
@@ -8,7 +10,7 @@
   :object_class: Hash
   :required:
     :renderer_version: Fixnum
-    :assets: :assets_hash
+    :assets: :assets
     :layout: :file
     :modals: :files
     :page_templates: :files
@@ -17,16 +19,18 @@
   :allowed:
     :additional_templates: :full_file_paths
     :include: :include_hash
-    :shared_configs: :component_configs
+    :shared_configs: :shared_configs
 
 :assets:
   :object_class: Hash
   :required:
-    :apply: :files
-    :basic: :files
+    :scripts: :scripts_hash
+    :styles: :styles
 
 :boolean:
-  :object_classes: [TrueClass, FalseClass]
+  :object_classes:
+    - TrueClass
+    - FalseClass
 
 :code_eval_hash:
   :object_class: Hash
@@ -41,37 +45,12 @@
     :years_last_50: String
     :pay_frequency: String
     :upload_types: String
+    :property_types: String
+    :occupancy_types: String
+    :same_address_responses: String
+    :ethnicities: String
+    :genders: String
   :language: :ruby
-
-# TODO finish individual component configs: footer(done) form header progress? sidebar text_body
-:footer_config:
-  :object_class: Hash
-  :required:
-    :elements: :footer_element
-
-:form_config:
-  :object_class: Hash
-  :required:
-    :sections: :form_sections
-
-:header_config:
-  :object_class: Hash
-  :required:
-    :sections: :header_sections
-
-# Keep progress steps or no?
-# :progress_config:
-#   :object_class: Hash
-
-:sidebar_config:
-  :object_class: Hash
-  :required:
-    :elements: :sidebar_elements
-
-:text_body_config:
-  :object_class: Hash
-  :required:
-    :sections: :text_body_sections
 
 :component_configs:
   :object_class: Hash
@@ -81,10 +60,31 @@
       :req_key: '%{sister_val}'
       :req_val: '%{sister_val}_config'
 
+# TODO finish individual component configs: header progress? sidebar
+:header_config:
+  :object_class: Hash
+  :allowed_min: 1
+  :allowed:
+    :partial: :file
+    :sections: Array
+    # :sections: :header_sections
+
+# Keep progress steps or no?
+:progress_config:
+  :object_class: Hash
+
+:sidebar_config:
+  :object_class: Hash
+  :required:
+    :elements: Array
+    # :elements: :sidebar_elements
+
+
 
 :components:
   :object_class: Array
-  :value_types: [String]
+  :value_types:
+    - String
   :allowed:
     - footer
     - form
@@ -113,7 +113,13 @@
 
 :fixnums:
   :object_class: Array
-  :value_types: [Fixnum]
+  :value_types:
+    - Fixnum
+
+:footer_config:
+  :object_class: Hash
+  :required:
+    :elements: :footer_elements
 
 :footer_element:
   :object_class: Hash
@@ -123,6 +129,28 @@
     :partial:
       :legal_notices:
         :sections: :legal_sections
+
+:footer_elements:
+  :object_class: Array
+  :value_types:
+    - :footer_element
+
+:form_config:
+  :object_class: Hash
+  :required:
+    :sections: :form_sections
+  :allowed:
+    :use_counters: :boolean
+    :attrs: Hash
+
+:form_sections:
+  :object_class: Array
+  :value_types:
+    - :form_section
+
+# TODO finish form_section
+:form_section:
+  :object_class: Hash
 
 :full_file_path:
   :object_class: String
@@ -148,6 +176,11 @@
       :type: Regexp
       :paramaters: /^#[\w-]*$/
 
+:legal_notices:
+  :object_class: Hash
+  :required:
+    :sections: :legal_sections
+
 :legal_sections:
   :object_class: Array
   :value_types:
@@ -157,6 +190,8 @@
   :object_class: Hash
   :required:
     :partial: :file
+  :allowed:
+    :details: 
   :required_when:
     :partial:
       :declined_legal:
@@ -173,7 +208,7 @@
     :components: :components
     :component_configs: :component_configs
   :allowed:
-    :template: 
+    :template: :file
 
 :page_configs:
   :object_class: Hash
@@ -181,12 +216,75 @@
     -
       :sister_key: :page_templates
       :req_key: '%{sister_val}'
-      :req_value: :page_config
+      :req_val: :page_config
+
+:scripts_hash:
+  :object_class: Hash
+  :required:
+    :apply: :files
+    :basic: :files
+
+:shared_configs:
+  :object_class: Hash
+  :allowed:
+    :sidebar: :sidebar_config
+    :footer: :footer_config
+
+:styles:
+  :object_class: Array
+  :value_types:
+    - :file
 
 :text_body_config:
   :object_class: Hash
+  :allowed_min: 1
+  :allowed:
+    :sections: :text_body_sections
+    :partial: :file
+    :title: :text_section
+    :legal_notices: :legal_notices
+
+:text_body_sections:
+  :object_class: Array
+  :value_types:
+    - :text_body_section
+
+:text_body_section:
+  :object-class: Hash
+  :allowed:
+    :elements: :text_body_elements
+
+:text_body_elements:
+  :object_class: Array
+  :value_types:
+    - :text_body_element
+
+:text_body_element:
+  :object-class: Hash
   :required:
-    :sections: Hash # TODO sections
+    :element_type: :text_body_element_type
+  :allowed:
+    :attrs: Hash
+    :img_attrs: Hash
+    :partial: :file
+    :template: :text_template
+    :text: :text_line
+    :text_lines: :text_lines
+    :url: :url
+
+:text_body_element_type:
+  :object_class: String
+  :value_types:
+    - String
+    - Symbol
+  :allowed:
+    - address
+    - avant_signature
+    - body
+    - icon
+    - link
+    - subtitle
+    - title
 
 :text_line:
   :object_class: String
