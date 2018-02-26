@@ -16,7 +16,7 @@ class ConfigValidator
 
     def is_valid?
       update_object_trace!
-      print_object_trace "Validating:"
+      puts ConfigValidator.printable_object_trace("Validating: ", @object_trace)
 
       case @object_data_type
       when String
@@ -25,37 +25,73 @@ class ConfigValidator
       when Symbol
         @valid_config = DATA_TYPES[@object_data_type]
         unless @valid_config
-          raise MissingDataTypeError.new "#{@object_data_type} is missing from data_types.yml", { location: 'ConfigValidator#is_valid?', trace: @object_trace }
+          err_msg = "'#{@object_data_type}' is missing from data_types.yml\n"
+          raise MissingDataTypeError.new err_msg, { trace: @object_trace }
         end
 
         @expected_classes = @valid_config[:object_classes] || [@valid_config[:object_class]]
+        if @expected_classes.any?(&:nil?)
+          err_msg = "#{@object_name} config is missing the parameter :object_class or :object_classes in "
+          raise MissingObjectClassError.new err_msg, { trace: @object_trace }
+        end
         is_class_valid?
       else
-        raise InvalidClassError.new "Expected: String or Symbol; Actual: #{@actual_class}", { trace: @object_trace }
+        err_msg = "Expected: String or Symbol; Actual: '#{@actual_class}'\n"
+        raise InvalidClassError.new err_msg, { trace: @object_trace }
       end
     end
 
     private
+
+    def next_object_is_valid?
+      # Requires @next_object and @next_data_type to be set
+      not_set = []
+      %i(@next_object @next_data_type).each do |ivar|
+        not_set << ivar unless defined?(instance_variable_get(ivar))
+      end
+      unless not_set.empty?
+        err_msg = "The following instance variables are not set: '#{not_set.join(', ')}'\n"
+        raise MissingInstanceVariableError.new err_msg, { trace: @object_trace }
+      end
+      next_actual_class = @next_object.class
+
+      case @next_data_type
+      when Symbol
+        new_validator_class = @next_data_type == :boolean ?
+          'ObjectValidatorBase' :
+          "#{next_actual_class}Validator"
+
+        new_validator = "ConfigValidator::#{new_validator_class}".constantize.new(
+          object: @next_object,
+          object_data_type: @next_data_type,
+          object_name: @next_object_name || @next_data_type,
+          object_trace: @object_trace,
+          parent_object: @object)
+
+        new_validator.is_valid?
+      when String
+        unless next_actual_class == @next_data_type.constantize
+          update_object_trace! object_name: next_object_name
+          raise InvalidClassError.new "Expected: #{@next_data_type}; Actual: #{next_actual_class}", { trace: @object_trace }
+        end
+        true
+      else
+        err_msg = "Invalid @next_data_type. Expected: Symbol or String; Actual class: '#{next_actual_class}', value: '#{@next_data_type}'\n"
+        raise ConfigValidatorError.new err_msg, { trace: @object_trace }
+      end
+    end
 
     def is_class_supported?
       SUPPORTED_CLASSES.include? @actual_class
     end
 
     def is_class_valid?
-      @expected_classes.map! { |klass| klass.class == Class ? klass : klass.constantize }
+      @expected_classes.map! { |klass| binding.pry if klass.nil?; klass.class == Class ? klass : klass.constantize }
       unless @expected_classes.include? @actual_class
-        raise InvalidClassError.new "Expected: #{@expected_classes.join(' or ')}; Got: #{@actual_class}", { trace: @object_trace }
+        err_msg = "Expected: '#{@expected_classes.join(' or ')}'; Got: '#{@actual_class}'\n"
+        raise InvalidClassError.new err_msg, { trace: @object_trace }
       end
       true
-    end
-
-    def print_object_trace(message)
-      ellipses = @object_trace.length > 7 ? '...' : ''
-      trace_string = @object_trace.last(7).join(' > ')
-      divided_on_file = trace_string.split('.yml > ')
-      divided_on_file[0].gsub!(' > ', '/')
-      trace_with_file_division = divided_on_file.join('.yml ::: ')
-      puts "#{message} #{ellipses}#{trace_with_file_division}"
     end
 
     def update_object_trace!(object_name: @object_name)

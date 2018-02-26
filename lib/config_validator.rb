@@ -3,6 +3,14 @@ require 'json'
 require 'active_support/core_ext/hash'
 
 class ConfigValidator
+  def self.printable_object_trace(message, object_trace)
+    trace_string = object_trace.join(' > ')
+    divided_on_file = trace_string.split('.yml > ')
+    divided_on_file[0].gsub!(' > ', '/')
+    trace_with_file_division = divided_on_file.join('.yml ::: ')
+    message + trace_with_file_division
+  end
+
   def initialize(market_partner_product: '',
                  config_path: 'sample_config/customer_application',
                  root_path: nil)
@@ -17,7 +25,7 @@ class ConfigValidator
         object: config,
         object_data_type: :config,
         object_name: :'config.yml',
-        object_trace: [mpp]
+        object_trace: ["/#{mpp}"]
       }
       HashValidator.new(args).is_valid?
     end

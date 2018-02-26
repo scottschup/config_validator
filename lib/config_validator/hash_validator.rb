@@ -9,40 +9,20 @@ class ConfigValidator
       # Note: the order of these checks is important as keys are added to 
       #   @current_params[object_data_type] for use at various points through the process
       unless has_all_required_keys?
-        puts @current_params
-        raise MissingRequiredParameterError.new "#{@object_name} is missing required parameter(s): #{@missing_keys.join(', ')}", { trace: @object_trace }
+        err_msg = "#{@object_name} (type: #{@object_data_type}) is missing the following required parameters: '#{@missing_keys.join(', ')}'\n"
+        raise MissingRequiredParameterError.new err_msg, { trace: @object_trace }
       end
 
       unless has_only_allowed_keys?
-        raise InvalidParameterError.new "#{@object_name} does not allow these parameter(s): #{@extra_keys.join(', ')}", { trace: @object_trace }
+        err_msg = "#{@object_name} (type: #{@object_data_type}) does not allow the following parameters: '#{@extra_keys.join(', ')}'\n"
+        raise InvalidParameterError.new err_msg, { trace: @object_trace }
       end
 
-      @object.each do |next_object_name, next_object|
-        next_data_type = @current_params[@object_data_type][next_object_name.to_sym]
-        next_actual_class = next_object.class
-
-        case next_data_type
-        when Symbol
-          new_validator_class = next_data_type == :boolean ?
-            'ObjectValidatorBase' :
-            "#{next_actual_class}Validator"
-
-          new_validator = "ConfigValidator::#{new_validator_class}".constantize.new(
-            object: next_object,
-            object_data_type: next_data_type,
-            object_name: next_object_name,
-            object_trace: @object_trace,
-            parent_object: @object)
-
-          new_validator.is_valid?
-        when String
-          unless next_actual_class == next_data_type.constantize
-            update_object_trace! object_name: next_object_name
-            raise InvalidClassError.new "Expected: #{next_data_type}; Actual: #{next_actual_class}", { trace: @object_trace }
-          end
-        else
-          raise ConfigValidatorError.new "Invalid next_data_type. Expected: Symbol or String; Actual class: #{next_actual_class}, value: #{next_data_type}", { trace: @object_trace }
-        end
+      @object.all? do |next_object_name, next_object|
+        @next_object = next_object
+        @next_object_name = next_object_name.to_sym
+        @next_data_type = @current_params[@object_data_type][@next_object_name]
+        next_object_is_valid?
       end
     end
 
@@ -60,11 +40,13 @@ class ConfigValidator
     end
 
     def calculate_required_and_allowed_key_numbers
-      min = @valid_config[:allowed_min]
-      max = @valid_config[:allowed_max]
-      num_required_keys = (@valid_config[:required] || {}).keys.length + (min || 0)
+      min = @valid_config[:allowed_min] || 0
+      num_required_keys = (@valid_config[:required] || {}).keys.length + min
+
       num_extra_keys = @object.keys.length - num_required_keys
-      num_allowed_keys = num_required_keys + (max || num_extra_keys)
+      max = @valid_config[:allowed_max] || num_extra_keys
+      num_allowed_keys = num_required_keys + max
+
       [num_required_keys, num_allowed_keys]
     end
 
@@ -91,7 +73,7 @@ class ConfigValidator
 
       allowed_when = @valid_config[:allowed_when]
       allowed_when && allowed_when.each do |key_to_check, conditional_values|
-        value = @object[key_to_check]
+        value = key_to_check.include?('@') ? instance_variable_get(key_to_check) : @object[key_to_check]
         conditional_values.each do |value_to_check, conditionally_allowed|
           @current_params[@object_data_type].merge!(conditionally_allowed) if value_to_check == value
         end

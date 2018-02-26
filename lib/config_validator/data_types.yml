@@ -1,7 +1,5 @@
 :active_versions:
   :object_class: Array
-  :value_types:
-    - Fixnum
   :allowed_min: 1
   :allowed: 
     - 1
@@ -67,6 +65,7 @@
   :allowed:
     :partial: :file
     :sections: Array
+    # TODO:
     # :sections: :header_sections
 
 # Keep progress steps or no?
@@ -77,14 +76,13 @@
   :object_class: Hash
   :required:
     :elements: Array
+    # TODO:
     # :elements: :sidebar_elements
 
 
 
 :components:
   :object_class: Array
-  :value_types:
-    - String
   :allowed:
     - footer
     - form
@@ -129,6 +127,8 @@
     :partial:
       :legal_notices:
         :sections: :legal_sections
+  :allowed:
+    :sections: Array # TODO: :footer_element_sections
 
 :footer_elements:
   :object_class: Array
@@ -151,6 +151,13 @@
 # TODO finish form_section
 :form_section:
   :object_class: Hash
+  :required:
+    :elements: Array # TODO: :form_elements
+  :allowed:
+    :attrs: Hash
+    :label: :text_section
+    :non_step: :boolean
+    :loan_result: :boolean
 
 :full_file_path:
   :object_class: String
@@ -250,9 +257,11 @@
     - :text_body_section
 
 :text_body_section:
-  :object-class: Hash
+  :object_class: Hash
   :allowed:
     :elements: :text_body_elements
+    :attrs: Hash
+    :partial: :file
 
 :text_body_elements:
   :object_class: Array
@@ -260,7 +269,7 @@
     - :text_body_element
 
 :text_body_element:
-  :object-class: Hash
+  :object_class: Hash
   :required:
     :element_type: :text_body_element_type
   :allowed:
@@ -308,6 +317,10 @@
     :template: :text_template
     :text: :text_line
     :text_lines: :text_lines
+  :allowed_when:
+    '@object_name':
+      :label:
+        :increment_counter: :boolean
 
 :text_template:
   :object_class: Hash

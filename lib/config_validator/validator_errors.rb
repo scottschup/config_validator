@@ -1,12 +1,6 @@
 class ConfigValidator
-  class ValidatorError < ConfigError
-    def initialize(message, error_hash)
-      location = error_hash[:location]
-      error_hash.delete :location if location
-      super(message, error_hash)
-      puts location
-    end
-  end
-
+  class ValidatorError < ConfigError; end
   class MissingDataTypeError < ValidatorError; end
+  class MissingObjectClassError < ValidatorError; end
+  class MissingInstanceVariableError < ValidatorError; end
 end
