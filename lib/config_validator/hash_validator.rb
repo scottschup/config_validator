@@ -19,25 +19,29 @@ class ConfigValidator
 
       @object.each do |next_object_name, next_object|
         next_data_type = @current_params[@object_data_type][next_object_name.to_sym]
-        binding.pry if ![Symbol, String].include?(next_data_type.class)
+        next_actual_class = next_object.class
 
         case next_data_type
         when Symbol
-          new_validator = "#{next_data_type}Validator".constantize.new(
+          new_validator_class = next_data_type == :boolean ?
+            'ObjectValidatorBase' :
+            "#{next_actual_class}Validator"
+
+          new_validator = "ConfigValidator::#{new_validator_class}".constantize.new(
             object: next_object,
             object_data_type: next_data_type,
             object_name: next_object_name,
-            object_trace: object_trace,
-            parent_object: object)
+            object_trace: @object_trace,
+            parent_object: @object)
+
           new_validator.is_valid?
         when String
-          next_actual_class = next_object.class
-          unless next_actual_class == next_data_type
+          unless next_actual_class == next_data_type.constantize
             update_object_trace! object_name: next_object_name
-            raise InvalidClassError.new "Expected: #{next_data_type}; Actual: #{actual_class}", { trace: object_trace }
+            raise InvalidClassError.new "Expected: #{next_data_type}; Actual: #{next_actual_class}", { trace: @object_trace }
           end
         else
-          raise ConfigValidatorError.new "Invalid next_data_type. Expected: Symbol or String; Actual class: #{actual_class}, value: #{next_data_type}", { trace: object_trace }
+          raise ConfigValidatorError.new "Invalid next_data_type. Expected: Symbol or String; Actual class: #{next_actual_class}, value: #{next_data_type}", { trace: @object_trace }
         end
       end
     end
@@ -45,12 +49,12 @@ class ConfigValidator
     def add_params_required_from_sister_to_current_params!
       return unless new_reqs = @valid_config[:required_from_sister]
       new_reqs.each do |new_req|
-        sister_vals = parent_object[new_req[:sister_key]]
+        sister_vals = @parent_object[new_req[:sister_key]]
         sister_vals.each do |sister_val|
           req_key = new_req[:req_key] % { sister_val: sister_val }
           req_val = new_req[:req_val].to_s % { sister_val: sister_val }
-          @current_params[object_data_type] ||= {}
-          @current_params[object_data_type][req_key.to_sym] = req_val.to_sym
+          @current_params[@object_data_type] ||= {}
+          @current_params[@object_data_type][req_key.to_sym] = req_val.to_sym
         end
       end
     end
@@ -67,10 +71,10 @@ class ConfigValidator
     def remove_shared_configs_from_current_params!
       @temp_hidden_params = {}
       if @object_name == :shared_configs
-        @shared_configs = @object.dup
+        @@shared_configs = @object.dup
       elsif @object_name == :component_configs
-        @shared_configs.each do |shared_component_name, config|
-          deleted = @current_params[object_data_type].delete shared_component_name
+        @@shared_configs.each do |shared_component_name, config|
+          deleted = @current_params[@object_data_type].delete shared_component_name
           @temp_hidden_params[shared_component_name] = config unless deleted.nil?
         end
       end

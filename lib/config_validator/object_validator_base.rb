@@ -12,7 +12,6 @@ class ConfigValidator
 
       @actual_class = @object.class
       @current_params = {}
-      @shared_configs = []
     end
 
     def is_valid?
@@ -31,7 +30,6 @@ class ConfigValidator
 
         @expected_classes = @valid_config[:object_classes] || [@valid_config[:object_class]]
         is_class_valid?
-        return true if @object_data_type == :boolean
       else
         raise InvalidClassError.new "Expected: String or Symbol; Actual: #{@actual_class}", { trace: @object_trace }
       end
@@ -69,7 +67,7 @@ class ConfigValidator
         @object_trace = @object_trace.first(3)
         object_to_add = [:'version_config.yml', :page_configs, object_name]
       elsif @object_trace.last == :page_configs && !PAGES_WITHOUT_DIRS.include?(object_name.to_sym)
-        @object_trace = object_trace.first(3)
+        @object_trace = @object_trace.first(3)
         object_to_add = [:stage_variants, object_name, :'page_config.yml', object_name]
       else
         object_to_add = [object_name]

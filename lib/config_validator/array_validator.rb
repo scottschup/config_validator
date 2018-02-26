@@ -1,7 +1,7 @@
 class ConfigValidator
   class ArrayValidator < ObjectValidatorBase
     def initialize(*args)
-      super args
+      super
     end
 
     def is_valid?

@@ -26,7 +26,7 @@ class ConfigValidator
 
     def build_all_configs
       # MPP == market_partner_product
-      MPPS.inject({}) { |agg, mpp| agg[mpp] = build_config(mpp); agg }
+      MPPS.inject({}) { |agg, mpp| agg.merge!(build_config(mpp)); agg }
     end
 
     def compiled_configs
