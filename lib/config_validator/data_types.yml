@@ -158,6 +158,8 @@
     :label: :text_section
     :non_step: :boolean
     :loan_result: :boolean
+    :caption: :text_section
+    :step_disabled_condition: String
 
 :full_file_path:
   :object_class: String
@@ -280,6 +282,12 @@
     :text: :text_line
     :text_lines: :text_lines
     :url: :url
+  :allowed_when:
+    :element_type:
+      :rates:
+        :rates: Array # TODO: rate
+      :terms:
+        :terms: Array # TODO: term
 
 :text_body_element_type:
   :object_class: String
@@ -294,6 +302,9 @@
     - link
     - subtitle
     - title
+    - rates
+    - terms
+    - avant_card_image
 
 :text_line:
   :object_class: String
@@ -321,6 +332,8 @@
     '@object_name':
       :label:
         :increment_counter: :boolean
+        :sublabel: :text_section
+        :bold: :boolean
 
 :text_template:
   :object_class: Hash

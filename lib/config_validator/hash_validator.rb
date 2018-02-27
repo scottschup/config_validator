@@ -10,19 +10,19 @@ class ConfigValidator
       #   @current_params[object_data_type] for use at various points through the process
       unless has_all_required_keys?
         err_msg = "#{@object_name} (type: #{@object_data_type}) is missing the following required parameters: '#{@missing_keys.join(', ')}'\n"
-        raise MissingRequiredParameterError.new err_msg, { trace: @object_trace }
+        @@errors << (MissingRequiredParameterError.new err_msg, { trace: @object_trace })
       end
 
       unless has_only_allowed_keys?
         err_msg = "#{@object_name} (type: #{@object_data_type}) does not allow the following parameters: '#{@extra_keys.join(', ')}'\n"
-        raise InvalidParameterError.new err_msg, { trace: @object_trace }
+        @@errors << (InvalidParameterError.new err_msg, { trace: @object_trace })
       end
 
-      @object.all? do |next_object_name, next_object|
+      @object.each do |next_object_name, next_object|
         @next_object = next_object
         @next_object_name = next_object_name.to_sym
         @next_data_type = @current_params[@object_data_type][@next_object_name]
-        next_object_is_valid?
+        next if next_object_is_valid?
       end
     end
 
@@ -73,9 +73,9 @@ class ConfigValidator
 
       allowed_when = @valid_config[:allowed_when]
       allowed_when && allowed_when.each do |key_to_check, conditional_values|
-        value = key_to_check.include?('@') ? instance_variable_get(key_to_check) : @object[key_to_check]
+        value = key_to_check.to_s.include?('@') ? instance_variable_get(key_to_check) : @object[key_to_check]
         conditional_values.each do |value_to_check, conditionally_allowed|
-          @current_params[@object_data_type].merge!(conditionally_allowed) if value_to_check == value
+          @current_params[@object_data_type].merge!(conditionally_allowed) if value_to_check.to_sym == value.to_sym
         end
       end
 

@@ -2,14 +2,10 @@ class ConfigValidator
   class ConfigError < StandardError
     def initialize(message = '', error_hash = {})
       if object_trace = error_hash[:trace]
-        puts
-        super ConfigValidator.printable_object_trace(message, object_trace)
+        super "#{ConfigValidator.printable_object_trace(message, object_trace)}\n"
       else
-        puts
-        super message
+        super "#{message}\n"
       end
-      puts caller
-      puts
     end
   end
 
@@ -26,5 +22,6 @@ class ConfigValidator
   class InvalidParameterError < ConfigError; end
 
   class InvalidValueError < ConfigError; end
+  class InvalidValueType < ConfigError; end
   class InvalidNumberOfElementsError < ConfigError; end
 end

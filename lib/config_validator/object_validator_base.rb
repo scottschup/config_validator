@@ -1,9 +1,26 @@
 class ConfigValidator
   class ObjectValidatorBase
     PAGES_WITHOUT_DIRS = %i(home declined service_failure)
-    DATA_TYPES = YAML.load_file('./lib/config_validator/data_types.yml')
+
+    def self.load_data_types!
+      return if defined?(@@data_types)
+      file_path = './lib/config_validator/data_types.yml'
+      puts "Loading:".colorize(:magenta) + " #{file_path}"
+      @@data_types = YAML.load_file(file_path)
+    end
+
+    def self.reload_data_types!
+      @@data_types = nil
+      load_data_types!
+    end
+
+    def self.reset_errors!
+      @@errors = []
+    end
 
     def initialize(object:, object_data_type:, object_name:, object_trace:, parent_object: {})
+      self.class.load_data_types!
+      @@errors ||= []
       @object = object
       @object_data_type = object_data_type
       @object_name = object_name
@@ -16,34 +33,40 @@ class ConfigValidator
 
     def is_valid?
       update_object_trace!
-      puts ConfigValidator.printable_object_trace("Validating: ", @object_trace)
+      puts ConfigValidator.printable_object_trace("Validating: ".colorize(:cyan), @object_trace)
 
       case @object_data_type
       when String
         @expected_classes = [@object_data_type]
         return is_class_supported? && is_class_valid?
       when Symbol
-        @valid_config = DATA_TYPES[@object_data_type]
+        is_valid = true
+        @valid_config = @@data_types[@object_data_type]
         unless @valid_config
           err_msg = "'#{@object_data_type}' is missing from data_types.yml\n"
-          raise MissingDataTypeError.new err_msg, { trace: @object_trace }
+          @@errors << (MissingDataTypeError.new err_msg, { trace: @object_trace })
+          is_valid = false
         end
 
         @expected_classes = @valid_config[:object_classes] || [@valid_config[:object_class]]
-        if @expected_classes.any?(&:nil?)
+        @expected_classes.each do |klass|
+          next unless klass.nil?
           err_msg = "#{@object_name} config is missing the parameter :object_class or :object_classes in "
-          raise MissingObjectClassError.new err_msg, { trace: @object_trace }
+          @@errors << (MissingObjectClassError.new err_msg, { trace: @object_trace })
+          is_valid = false
         end
-        is_class_valid?
+        is_valid
       else
         err_msg = "Expected: String or Symbol; Actual: '#{@actual_class}'\n"
-        raise InvalidClassError.new err_msg, { trace: @object_trace }
+        @@errors << (InvalidClassError.new err_msg, { trace: @object_trace })
+        false
       end
     end
 
     private
 
     def next_object_is_valid?
+      is_valid = true
       # Requires @next_object and @next_data_type to be set
       not_set = []
       %i(@next_object @next_data_type).each do |ivar|
@@ -51,7 +74,8 @@ class ConfigValidator
       end
       unless not_set.empty?
         err_msg = "The following instance variables are not set: '#{not_set.join(', ')}'\n"
-        raise MissingInstanceVariableError.new err_msg, { trace: @object_trace }
+        @@errors << (MissingInstanceVariableError.new err_msg, { trace: @object_trace })
+        is_valid = false
       end
       next_actual_class = @next_object.class
 
@@ -68,17 +92,19 @@ class ConfigValidator
           object_trace: @object_trace,
           parent_object: @object)
 
-        new_validator.is_valid?
+        is_valid && new_validator.is_valid?
       when String
         unless next_actual_class == @next_data_type.constantize
-          update_object_trace! object_name: next_object_name
-          raise InvalidClassError.new "Expected: #{@next_data_type}; Actual: #{next_actual_class}", { trace: @object_trace }
+          update_object_trace! object_name: @next_object_name
+          @@errors << (InvalidClassError.new "Expected: #{@next_data_type}; Actual: #{next_actual_class}\n", { trace: @object_trace })
+          is_valid = false
         end
-        true
       else
-        err_msg = "Invalid @next_data_type. Expected: Symbol or String; Actual class: '#{next_actual_class}', value: '#{@next_data_type}'\n"
-        raise ConfigValidatorError.new err_msg, { trace: @object_trace }
+        err_msg = "Invalid @next_data_type. Expected: Symbol or String; @next_data_type class: '#{@next_data_type.class}'\n"
+        @@errors << (ValidatorError.new err_msg, { trace: @object_trace })
+        is_valid = false
       end
+      is_valid
     end
 
     def is_class_supported?
@@ -89,7 +115,8 @@ class ConfigValidator
       @expected_classes.map! { |klass| binding.pry if klass.nil?; klass.class == Class ? klass : klass.constantize }
       unless @expected_classes.include? @actual_class
         err_msg = "Expected: '#{@expected_classes.join(' or ')}'; Got: '#{@actual_class}'\n"
-        raise InvalidClassError.new err_msg, { trace: @object_trace }
+        @@errors << (InvalidClassError.new err_msg, { trace: @object_trace })
+        false
       end
       true
     end

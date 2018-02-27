@@ -9,18 +9,20 @@ class ConfigValidator
       super
       unless has_only_allowed_values?
         err_msg = "'#{@invalid_value}' is not an allowed value.\n"
-        raise InvalidValueError.new err_msg, { trace: @object_trace }
+        @@errors << (InvalidValueError.new err_msg, { trace: @object_trace })
       end
 
       unless has_correct_number_of_elements?
         err_msg = "'#{@object_name} (type: #{@object_data_type})' has an invalid number of elements."
         err_msg += "\nExpected between #{@expected_range[:min]} and #{@epxected_range[:max]}, but got #{@actual_array_length}.\n"
-        raise InvalidNumberOfElementsError.new err_msg, { trace: @object_trace }
+        @@errors << (InvalidNumberOfElementsError.new err_msg, { trace: @object_trace })
       end
 
       return true unless @valid_config[:value_types]
-      @object.all? do |element|
-        element_is_an_allowed_value_type? element
+      @object.each do |element|
+        next if element_is_an_allowed_value_type?(element)
+        err_msg = "#{@next_data_type} is not a valid data type for #{@object_name}"
+        @@errors << (InvalidValueType.new err_msg, { trace: @object_trace })
       end
     end
 

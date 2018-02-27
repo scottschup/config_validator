@@ -1,6 +1,7 @@
-require 'yaml'
-require 'json'
 require 'active_support/core_ext/hash'
+require 'colorize'
+require 'json'
+require 'yaml'
 
 class ConfigValidator
   def self.printable_object_trace(message, object_trace)
@@ -20,15 +21,34 @@ class ConfigValidator
   end
 
   def start_validation
-    config_compiler.configs_to_test.all? do |mpp, config|
+    ObjectValidatorBase.reset_errors!
+    config_compiler.configs_to_test.each do |mpp, config|
       args = {
         object: config,
         object_data_type: :config,
         object_name: :'config.yml',
-        object_trace: ["/#{mpp}"]
+        object_trace: [mpp]
       }
       HashValidator.new(args).is_valid?
     end
+
+    errors = ObjectValidatorBase.class_eval('@@errors')
+    if errors.empty?
+      puts 'All good!'.colorize(:green)
+      return
+    end
+    err_msgs = errors.map { |err| "#{err.class.to_s.colorize(:red).bold}: #{err.message}" }
+
+    puts
+    puts "#{err_msgs.length} errors:".colorize(:yellow).bold
+    puts "\n#{err_msgs.join("\n")}"
+  end
+
+  def reload!
+    @config_compiler = nil
+    config_compiler.configs_to_test
+    ObjectValidatorBase.reload_data_types!
+    true
   end
 
   private

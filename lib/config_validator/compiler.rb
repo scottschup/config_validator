@@ -43,7 +43,7 @@ class ConfigValidator
         @config_path,
         mpp.to_s,
         'config.yml')
-      puts "Loading: #{file_path}"
+      puts "Loading:".colorize(:yellow) + " #{file_path}"
       YAML.load_file(file_path).deep_symbolize_keys 
     rescue StandardError => e
       raise RootConfigNotFoundError.new "Missing root config.yml for #{mpp}"
@@ -57,7 +57,7 @@ class ConfigValidator
         'v',
         '1',
         'version_config.yml')
-      puts "Loading: #{file_path}"
+      puts "Loading:".colorize(:yellow) + " #{file_path}"
       YAML.load_file(file_path).deep_symbolize_keys
     rescue StandardError => e
       raise VersionConfigNotFoundError.new "Missing v1 version_config.yml for #{mpp}"
@@ -72,7 +72,7 @@ class ConfigValidator
         'stage_variants',
         page,
         'page_config.yml')
-      puts "Loading: #{file_path}"
+      puts "Loading:".colorize(:yellow) + " #{file_path}"
       YAML.load_file(file_path).deep_symbolize_keys
     rescue StandardError => e
       if e.message.include? 'No such file'
