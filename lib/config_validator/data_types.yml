@@ -30,6 +30,14 @@
     - TrueClass
     - FalseClass
 
+:button:
+  :object_class: Hash
+  :required:
+    :text: :text_section
+  :allowed:
+    :disable_icons: :boolean
+    :attrs: Hash
+
 :code_eval_hash:
   :object_class: Hash
   :allowed:
@@ -58,29 +66,7 @@
       :req_key: '%{sister_val}'
       :req_val: '%{sister_val}_config'
 
-# TODO finish individual component configs: header progress? sidebar
-:header_config:
-  :object_class: Hash
-  :allowed_min: 1
-  :allowed:
-    :partial: :file
-    :sections: Array
-    # TODO:
-    # :sections: :header_sections
-
-# Keep progress steps or no?
-:progress_config:
-  :object_class: Hash
-
-:sidebar_config:
-  :object_class: Hash
-  :required:
-    :elements: Array
-    # TODO:
-    # :elements: :sidebar_elements
-
-
-
+# TODO finish individual component configs: progress? sidebar
 :components:
   :object_class: Array
   :allowed:
@@ -97,11 +83,43 @@
     :active_versions: :active_versions
     :apply: :apply_config
 
+:consents_sections:
+  :object_class: Array
+  :value_types:
+    - :consent_section
+
+:consent_section:
+  :object_class: Hash
+  :required:
+    :section_type: :consent_section_type
+    :consents: :consents
+  :allowed:
+    :hide_state_consents: :boolean
+    :hide_conditions: :hide_conditions
+
+:consent_section_type:
+  :object_class: String
+  :allowed:
+    - checkbox
+    - li
+    - text
+
+:consents:
+  :object_class: Array
+  :value_types:
+    - :consent
+
+:consent:
+  :object_class: Hash
+  :required: 
+    :field_options: Hash # TODO field_options
+
+
 :file:
   :object_class: String
   :validations:
     -
-      :type: Regexp
+      :type: :regexp
       :parameters: '/^[\w\d_-]*(\.[\w]{3,4})*$/'
 
 :files:
@@ -165,13 +183,51 @@
   :object_class: String
   :validations:
     -
-      :type: Regexp
-      :parameters: '/^[\/\\]{1,2}[\w\d_-\/\\]*(\.[\w]{3,4})*$/'
+      :type: :regexp
+      :parameters: '/^[\/\\]{1,2}[-\w\d_\/\\]*(\.[\w]{3,4})*$/'
 
 :full_file_paths:
   :object_class: Array
   :value_types:
     - :full_file_path
+
+:header_config:
+  :object_class: Hash
+  :allowed_min: 1
+  :allowed:
+    :partial: :file
+    :sections: :header_sections
+
+:header_section:
+  :object_class: Hash
+  :required:
+    :elements: :header_section_elements
+  :allowed:
+    :attrs: Hash
+
+:header_sections:
+  :object_class: Array
+  :value_types:
+    - :header_section
+
+:header_section_element:
+  :object_class: Hash
+  :required:
+    :element_type: :file
+    :text: :text_section
+  :allowed:
+    :attrs: Hash
+
+:header_section_elements:
+  :object_class: Array
+  :value_types:
+    - :header_section_element
+
+:hide_conditions:
+  :object_class: Array
+  :value_types:
+    - :boolean
+    - String
 
 :include_hash:
   :object_class: Hash
@@ -182,8 +238,8 @@
   :object_class: String
   :validations:
     -
-      :type: Regexp
-      :paramaters: /^#[\w-]*$/
+      :type: :regexp
+      :parameters: /^#[\w-]*$/
 
 :legal_notices:
   :object_class: Hash
@@ -227,6 +283,17 @@
       :req_key: '%{sister_val}'
       :req_val: :page_config
 
+# Keep progress steps or no?
+:progress_config:
+  :object_class: Hash
+
+:rate:
+  :required:
+    :label: :text_section
+    :value: :text_section
+  :allowed:
+    :highlight: :boolean
+
 :scripts_hash:
   :object_class: Hash
   :required:
@@ -238,6 +305,12 @@
   :allowed:
     :sidebar: :sidebar_config
     :footer: :footer_config
+
+:sidebar_config:
+  :object_class: Hash
+  :required:
+    :elements: Array
+    # TODO: :sidebar_elements
 
 :styles:
   :object_class: Array
@@ -252,23 +325,6 @@
     :partial: :file
     :title: :text_section
     :legal_notices: :legal_notices
-
-:text_body_sections:
-  :object_class: Array
-  :value_types:
-    - :text_body_section
-
-:text_body_section:
-  :object_class: Hash
-  :allowed:
-    :elements: :text_body_elements
-    :attrs: Hash
-    :partial: :file
-
-:text_body_elements:
-  :object_class: Array
-  :value_types:
-    - :text_body_element
 
 :text_body_element:
   :object_class: Hash
@@ -287,7 +343,14 @@
       :rates:
         :rates: Array # TODO: rate
       :terms:
-        :terms: Array # TODO: term
+        :terms: Hash # TODO: term
+      :consents:
+        :sections: :consents_sections
+
+:text_body_elements:
+  :object_class: Array
+  :value_types:
+    - :text_body_element
 
 :text_body_element_type:
   :object_class: String
@@ -305,6 +368,22 @@
     - rates
     - terms
     - avant_card_image
+
+:text_body_section:
+  :object_class: Hash
+  :required_when:
+    :partial:
+      :'credit_card/cta':
+        :button: :button
+  :allowed:
+    :elements: :text_body_elements
+    :attrs: Hash
+    :partial: :file
+
+:text_body_sections:
+  :object_class: Array
+  :value_types:
+    - :text_body_section
 
 :text_line:
   :object_class: String
@@ -343,8 +422,9 @@
 
 :text_template_data:
   :object_class: Hash
-  :allow_min: 1
-  :allow_any: :text_template_data_interpolation
+  :allowed_min: 1
+  :allowed:
+    :__any: :text_template_data_interpolation
 
 :text_template_data_interpolation:
   :object_class: Hash
@@ -368,19 +448,17 @@
 
 :text_template_link_type_string:
   :object_class: String
+  :allowed:
   :validations:
-    -
-      :type: :included_in?
-      :parameters:
-        - modal
-        - url
-        - tooltip
+    - modal
+    - url
+    - tooltip
 
 :url:
   :object_class: String
   :validations:
     -
-      :type: Regexp
+      :type: :regexp
       :parameters: '/^https?:\/\/([-_\w\d]*\.)*[\w]{2,3}(\/[-_\#!\w\d\.]*)*$/'
 
 :version_config:

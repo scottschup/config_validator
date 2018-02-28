@@ -7,8 +7,8 @@ class ConfigValidator
   def self.printable_object_trace(message, object_trace)
     trace_string = object_trace.join(' > ')
     divided_on_file = trace_string.split('.yml > ')
-    divided_on_file[0].gsub!(' > ', '/')
-    trace_with_file_division = divided_on_file.join('.yml ::: ')
+    divided_on_file[0] = divided_on_file[0].gsub(' > ', '/').colorize(:light_white)
+    trace_with_file_division = divided_on_file.join ".yml\n\t".colorize(:light_white)
     message + trace_with_file_division
   end
 
@@ -20,8 +20,8 @@ class ConfigValidator
     @root_path = root_path || defined?(Rails) ? Rails.root : Dir.pwd
   end
 
-  def start_validation
-    ObjectValidatorBase.reset_errors!
+  def validate
+    ObjectValidatorBase.reset_class_vars!
     config_compiler.configs_to_test.each do |mpp, config|
       args = {
         object: config,
@@ -29,19 +29,14 @@ class ConfigValidator
         object_name: :'config.yml',
         object_trace: [mpp]
       }
-      HashValidator.new(args).is_valid?
+      HashValidator.new(args).valid?
     end
 
+    puts "\n#{ObjectValidatorBase.class_eval('@@counter')} objects validated.".colorize(:light_white).bold
     errors = ObjectValidatorBase.class_eval('@@errors')
-    if errors.empty?
-      puts 'All good!'.colorize(:green)
-      return
-    end
-    err_msgs = errors.map { |err| "#{err.class.to_s.colorize(:red).bold}: #{err.message}" }
-
-    puts
-    puts "#{err_msgs.length} errors:".colorize(:yellow).bold
-    puts "\n#{err_msgs.join("\n")}"
+    return true if errors.empty?
+    print_errors
+    false
   end
 
   def reload!
@@ -58,6 +53,22 @@ class ConfigValidator
       market_partner_product: @market_partner_product,
       config_path: @config_path,
       root_path: @root_path)
+  end
+
+  def print_errors
+    errors = ObjectValidatorBase.class_eval('@@errors')
+    return puts('All good!'.colorize(:green)) if errors.empty?
+
+    err_totals = Hash.new { |h, k| h[k] = 0 }
+    err_msgs = errors.map do |err|
+      err_class = err.class.to_s.colorize(:red)
+      err_totals[err_class.colorize(:red)] += 1
+      "#{err_class.colorize(:red).bold}: #{err.message}"
+    end
+
+    puts "#{err_msgs.length} errors:".colorize(:yellow).bold
+    puts "\n#{err_msgs.join("\n")}\n"
+    err_totals.each { |err_class, count| puts("#{err_class}: #{count}") }
   end
 
 end

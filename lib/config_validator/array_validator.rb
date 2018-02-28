@@ -4,24 +4,24 @@ class ConfigValidator
       super
     end
 
-    def is_valid?
+    def valid?
       # handle value_types, allowed, allowed_min/_max
       super
       unless has_only_allowed_values?
-        err_msg = "'#{@invalid_value}' is not an allowed value.\n"
+        err_msg = "'#{@invalid_value.colorize(:cyan)}' is not an allowed value.\n"
         @@errors << (InvalidValueError.new err_msg, { trace: @object_trace })
       end
 
       unless has_correct_number_of_elements?
         err_msg = "'#{@object_name} (type: #{@object_data_type})' has an invalid number of elements."
-        err_msg += "\nExpected between #{@expected_range[:min]} and #{@epxected_range[:max]}, but got #{@actual_array_length}.\n"
+        err_msg += "\nExpected between #{@expected_range[:min].colorize(:light_white).bold} and #{@epxected_range[:max].colorize(:light_white).bold}, but got #{@actual_array_length.colorize(:cyan)}.\n"
         @@errors << (InvalidNumberOfElementsError.new err_msg, { trace: @object_trace })
       end
 
       return true unless @valid_config[:value_types]
       @object.each do |element|
         next if element_is_an_allowed_value_type?(element)
-        err_msg = "#{@next_data_type} is not a valid data type for #{@object_name}"
+        err_msg = "#{@next_data_type.colorize(:cyan)} is not a valid data type for #{@object_name.colorize(:light_white).bold}"
         @@errors << (InvalidValueType.new err_msg, { trace: @object_trace })
       end
     end
@@ -30,7 +30,11 @@ class ConfigValidator
 
     def has_only_allowed_values?
       return true unless (allowed = @valid_config[:allowed])
-      @object.all? { |element| allowed.include? element }
+      @object.all? do |element|
+        is_allowed = allowed.include? element
+        @invalid_value = is_allowed ? nil : element
+        is_allowed
+      end
     end
 
     def has_correct_number_of_elements?
@@ -50,7 +54,7 @@ class ConfigValidator
       @next_object = next_object
       @valid_config[:value_types].any? do |next_data_type|
         @next_data_type = next_data_type
-        next_object_is_valid?
+        next_object_valid?
       end
     end
 

@@ -46,7 +46,7 @@ class ConfigValidator
       puts "Loading:".colorize(:yellow) + " #{file_path}"
       YAML.load_file(file_path).deep_symbolize_keys 
     rescue StandardError => e
-      raise RootConfigNotFoundError.new "Missing root config.yml for #{mpp}"
+      raise RootConfigNotFoundError.new "Missing root config.yml for #{mpp.to_s.colorize(:light_white)}"
     end
 
     def load_version_config_yaml_file(mpp)
@@ -60,7 +60,7 @@ class ConfigValidator
       puts "Loading:".colorize(:yellow) + " #{file_path}"
       YAML.load_file(file_path).deep_symbolize_keys
     rescue StandardError => e
-      raise VersionConfigNotFoundError.new "Missing v1 version_config.yml for #{mpp}"
+      raise VersionConfigNotFoundError.new "Missing #{'.../v/1/version_config.yml'.colorize(:light_white)} for #{mpp}"
     end
 
     def load_page_config_yaml_file(mpp, page)
@@ -76,7 +76,7 @@ class ConfigValidator
       YAML.load_file(file_path).deep_symbolize_keys
     rescue StandardError => e
       if e.message.include? 'No such file'
-        raise PageConfigNotFoundError.new "Missing #{page} page_config.yml for #{mpp}"
+        raise PageConfigNotFoundError.new "Missing #{('../' + page + '/page_config.yml').colorize(:light_white)} for #{mpp}"
       else
         raise StandardError, e
       end

@@ -20,6 +20,7 @@ class ConfigValidator
   class TooFewParametersError < ConfigError; end
   class TooManyParametersError < ConfigError; end
   class InvalidParameterError < ConfigError; end
+  class UnsupportedValidationTypeError < ConfigError; end
 
   class InvalidValueError < ConfigError; end
   class InvalidValueType < ConfigError; end

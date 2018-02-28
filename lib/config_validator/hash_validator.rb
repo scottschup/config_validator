@@ -4,26 +4,30 @@ class ConfigValidator
       super
     end
 
-    def is_valid?
-      super
+    def valid?
+      is_valid = super
       # Note: the order of these checks is important as keys are added to 
       #   @current_params[object_data_type] for use at various points through the process
       unless has_all_required_keys?
-        err_msg = "#{@object_name} (type: #{@object_data_type}) is missing the following required parameters: '#{@missing_keys.join(', ')}'\n"
+        err_msg = "#{@object_name.to_s.colorize(:cyan)} (type: #{@object_data_type.to_s.colorize(:cyan)}) is missing the following required parameters: #{@missing_keys.join(', ').colorize(:light_white).bold}\n"
         @@errors << (MissingRequiredParameterError.new err_msg, { trace: @object_trace })
+        is_valid = false
       end
 
       unless has_only_allowed_keys?
-        err_msg = "#{@object_name} (type: #{@object_data_type}) does not allow the following parameters: '#{@extra_keys.join(', ')}'\n"
+        err_msg = "#{@object_name.to_s.colorize(:cyan)} (type: #{@object_data_type.to_s.colorize(:cyan)}) does not allow the following parameters: #{@extra_keys.join(', ').colorize(:light_white).bold}\n"
         @@errors << (InvalidParameterError.new err_msg, { trace: @object_trace })
+        is_valid = false
       end
 
       @object.each do |next_object_name, next_object|
         @next_object = next_object
         @next_object_name = next_object_name.to_sym
-        @next_data_type = @current_params[@object_data_type][@next_object_name]
-        next if next_object_is_valid?
+        @next_data_type = @valid_config.dig(:allowed, :__any) ||
+          @current_params[@object_data_type][@next_object_name]
+        is_valid = false unless next_object_valid?
       end
+      is_valid
     end
 
     def add_params_required_from_sister_to_current_params!
@@ -39,22 +43,10 @@ class ConfigValidator
       end
     end
 
-    def calculate_required_and_allowed_key_numbers
-      min = @valid_config[:allowed_min] || 0
-      num_required_keys = (@valid_config[:required] || {}).keys.length + min
-
-      num_extra_keys = @object.keys.length - num_required_keys
-      max = @valid_config[:allowed_max] || num_extra_keys
-      num_allowed_keys = num_required_keys + max
-
-      [num_required_keys, num_allowed_keys]
-    end
-
     def remove_shared_configs_from_current_params!
       @temp_hidden_params = {}
-      if @object_name == :shared_configs
-        @@shared_configs = @object.dup
-      elsif @object_name == :component_configs
+      return @@shared_configs = @object.dup if @object_name == :shared_configs
+      if @object_name == :component_configs
         @@shared_configs.each do |shared_component_name, config|
           deleted = @current_params[@object_data_type].delete shared_component_name
           @temp_hidden_params[shared_component_name] = config unless deleted.nil?
@@ -68,6 +60,8 @@ class ConfigValidator
     end
 
     def has_only_allowed_keys?
+      return true if @valid_config.dig(:allowed, :__any)
+      return true if (@valid_config[:allowed] || @valid_config[:allowed_when]).nil?
       @current_params[@object_data_type].merge!(@valid_config[:allowed] || {})
       return_shared_configs_to_current_params!
 
@@ -90,9 +84,9 @@ class ConfigValidator
 
       required_when = @valid_config[:required_when]
       required_when && required_when.each do |key_to_check, conditional_values|
-        value = @object[key_to_check]
+        value = @object[key_to_check] || :''
         conditional_values.each do |value_to_check, conditionally_required|
-          @current_params[@object_data_type].merge!(conditionally_required) if value_to_check == value
+          @current_params[@object_data_type].merge!(conditionally_required) if value_to_check.to_sym == value.to_sym
         end
       end
 
