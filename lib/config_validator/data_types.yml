@@ -33,7 +33,7 @@
 :button:
   :object_class: Hash
   :required:
-    :text: :text_section
+    :text: String
   :allowed:
     :disable_icons: :boolean
     :attrs: Hash
@@ -120,17 +120,12 @@
   :validations:
     -
       :type: :regexp
-      :parameters: '/^[\w\d_-]*(\.[\w]{3,4})*$/'
+      :parameters: /^[\w\d_-]*(\.[\w]{3,4})*$/
 
 :files:
   :object_class: Array
   :value_types:
     - :file
-
-:fixnums:
-  :object_class: Array
-  :value_types:
-    - Fixnum
 
 :footer_config:
   :object_class: Hash
@@ -184,7 +179,7 @@
   :validations:
     -
       :type: :regexp
-      :parameters: '/^[\/\\]{1,2}[-\w\d_\/\\]*(\.[\w]{3,4})*$/'
+      :parameters: /^[\/\\]{1,2}[-\w\d_\/\\]*(\.[\w]{3,4})*$/
 
 :full_file_paths:
   :object_class: Array
@@ -214,7 +209,7 @@
   :object_class: Hash
   :required:
     :element_type: :file
-    :text: :text_section
+    :text: String
   :allowed:
     :attrs: Hash
 
@@ -459,7 +454,7 @@
   :validations:
     -
       :type: :regexp
-      :parameters: '/^https?:\/\/([-_\w\d]*\.)*[\w]{2,3}(\/[-_\#!\w\d\.]*)*$/'
+      :parameters: /^https?:\/\/([-_\w\d]*\.)*[\w]{2,3}(\/[-_\#!\w\d\.]*)*$/
 
 :version_config:
   :object_class: Hash

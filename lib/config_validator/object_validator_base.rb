@@ -1,6 +1,7 @@
 class ConfigValidator
   class ObjectValidatorBase
     PAGES_WITHOUT_DIRS = %i(home declined service_failure)
+    SUPPORTED_CLASSES = [Array, Hash, String, Fixnum]
 
     def self.load_data_types!
       return if defined?(@@data_types) && !@@data_types.nil?
@@ -37,33 +38,36 @@ class ConfigValidator
     end
 
     def valid?
-      @@counter += 1
       update_object_trace!
       puts ConfigValidator.printable_object_trace("Validating: ".colorize(:cyan), @object_trace)
+
+      is_valid = true
+      @@counter += 1
 
       case @object_data_type
       when String
         @expected_classes = [@object_data_type]
-        return is_class_supported? && is_class_valid?
+        return (is_class_supported? && is_class_valid?)
       when Symbol
-        is_valid = true
         @valid_config = @@data_types[@object_data_type] || {}
         if @valid_config.empty?
           err_msg = "'#{@object_data_type.to_s.colorize(:cyan)}' is missing from #{'data_types.yml'.colorize(:magenta)}\n"
           @@errors << (MissingDataTypeError.new err_msg, { trace: @object_trace })
           is_valid = false
         end
-
         @expected_classes = @valid_config[:object_classes] || [@valid_config[:object_class]] # the result of the latter condition may be #=> [nil]
         @expected_classes.each do |klass|
-          next unless klass.nil?
-          err_msg = "#{(':' + @object_name.to_s).colorize(:cyan)} config is missing the parameter #{':object_class or :object_classes'.colorize(:light_white).bold} in\n"
-          @@errors << (MissingObjectClassError.new err_msg, { trace: @object_trace })
-          is_valid = false
+          if klass.nil?
+            err_msg = "#{(':' + @object_name.to_s).colorize(:cyan)} config is missing the parameter #{':object_class or :object_classes'.colorize(:light_white).bold} in\n"
+            @@errors << (MissingObjectClassError.new err_msg, { trace: @object_trace })
+            is_valid = false
+            next
+          end
+          is_valid = false unless (is_class_supported? && is_class_valid?)
         end
         is_valid
       else
-        err_msg = "Expected: #{'String or Symbol'.colorize(:light_white).bold}; Actual: '#{@actual_class.colorize(:cyan)}'\n"
+        err_msg = "Expected: #{'String or Symbol'.colorize(:light_white).bold}; Actual: #{@actual_class.colorize(:cyan)}\n"
         @@errors << (InvalidClassError.new err_msg, { trace: @object_trace })
         false
       end
@@ -118,9 +122,8 @@ class ConfigValidator
     end
 
     def is_class_valid?
-      @expected_classes.map! { |klass| binding.pry if klass.nil?; klass.class == Class ? klass : klass.constantize }
-      unless @expected_classes.include? @actual_class
-        err_msg = "Expected: '#{@expected_classes.join(' or ').colorize(:light_white).bold}'; Got: '#{@actual_class.colorize(:cyan)}'\n"
+      unless @expected_classes.include? @actual_class.to_s
+        err_msg = "Expected: #{@expected_classes.join(' or ').colorize(:light_white).bold}; Got: #{@actual_class.to_s.colorize(:cyan)}\n"
         @@errors << (InvalidClassError.new err_msg, { trace: @object_trace })
         false
       end

@@ -3,7 +3,6 @@ class ConfigValidator
     using ::CoreRefinements
 
     MPPS = %i(us_avantcredit_installment us_avantcredit_credit_card us_eloan_installment)
-    SUPPORTED_CLASSES = [Array, Hash, String, Fixnum]
 
     def initialize(market_partner_product: '',
                    config_path: 'config/customer_application',

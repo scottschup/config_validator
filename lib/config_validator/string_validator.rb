@@ -16,7 +16,7 @@ class ConfigValidator
         when :regexp
           is_valid = false unless eval(validation[:parameters]) =~ @object
         else
-          err_msg = "#{validation[:type].colorize(:cyan)} is not a supported String validation type"
+          err_msg = "#{validation[:type].to_s.colorize(:cyan)} is not a supported String validation type"
           @@errors << (UnsupportedValidationTypeError.new err_msg, { trace: @object_trace })
         end
       end
