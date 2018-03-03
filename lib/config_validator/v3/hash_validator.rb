@@ -9,14 +9,18 @@ class ConfigValidator
       # Note: the order of these checks is important as keys are added to 
       #   @current_params[object_data_type] for use at various points through the process
       unless has_all_required_keys?
-        err_msg = "#{@object_name.to_s.colorize(:cyan)} (type: #{@object_data_type.to_s.colorize(:cyan)}) is missing the following required parameters: #{@missing_keys.join(', ').colorize(:light_white).bold}\n"
-        @@errors << (MissingRequiredParameterError.new err_msg, { trace: @object_trace })
+        return false if @just_checking
+        err_msg = "#{@object_name.to_s.colorize(:cyan)} (type: #{@object_data_type.to_s.colorize(:cyan)}) is missing the following required parameters: #{@missing_keys.join(', ').colorize(:light_white).bold} (#{ConfigValidator.class_eval '@@counter'})\n"
+        err = (MissingRequiredParameterError.new err_msg, { trace: @object_trace, object: @object })
+        ConfigValidator.class_eval '@@errors << err'
         is_valid = false
       end
 
       unless has_only_allowed_keys?
-        err_msg = "#{@object_name.to_s.colorize(:cyan)} (type: #{@object_data_type.to_s.colorize(:cyan)}) does not allow the following parameters: #{@extra_keys.join(', ').colorize(:light_white).bold}\n"
-        @@errors << (InvalidParameterError.new err_msg, { trace: @object_trace })
+        return false if @just_checking
+        err_msg = "#{@object_name.to_s.colorize(:cyan)} (type: #{@object_data_type.to_s.colorize(:cyan)}) does not allow the following parameters: #{@extra_keys.join(', ').colorize(:light_white).bold} (#{ConfigValidator.class_eval '@@counter'})\n"
+        err = (InvalidParameterError.new err_msg, { trace: @object_trace, object: @object })
+        ConfigValidator.class_eval '@@errors << err'
         is_valid = false
       end
 

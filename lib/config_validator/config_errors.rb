@@ -2,7 +2,7 @@ class ConfigValidator
   class ConfigError < StandardError
     def initialize(message = '', error_hash = {})
       if object_trace = error_hash[:trace]
-        super "#{ConfigValidator.printable_object_trace(message, object_trace)}\n"
+        super "#{ConfigValidator.printable_object_trace(message, object_trace, error_hash[:object])}\n"
       else
         super "#{message}\n"
       end
@@ -12,7 +12,9 @@ class ConfigValidator
   class RootConfigNotFoundError < ConfigError; end
   class VersionConfigNotFoundError < ConfigError; end
   class PageConfigNotFoundError < ConfigError; end
+  class PageLoadError < ConfigError; end
 
+  class InvalidConfigVersionError < ConfigError; end
   class InvalidClassError < ConfigError; end
   class UnsupportedClassError < ConfigError; end
 

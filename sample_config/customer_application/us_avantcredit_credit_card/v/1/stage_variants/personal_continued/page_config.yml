@@ -43,7 +43,6 @@ component_configs:
           # income: monthly_net_income
           -
             element_type: fieldset
-            form_element_type: fieldset
             form_rows:
               -
                 form_groups:

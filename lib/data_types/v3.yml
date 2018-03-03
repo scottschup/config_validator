@@ -1,3 +1,9 @@
+:root_config:
+  :object_class: Hash
+  :required:
+    :active_versions: :active_versions
+    :apply: :apply_config
+
 :active_versions:
   :object_class: Array
   :allowed_min: 1
@@ -7,13 +13,13 @@
 :apply_config:
   :object_class: Hash
   :required:
-    :renderer_version: Fixnum
     :assets: :assets
     :layout: :file
     :modals: :files
-    :page_templates: :files
-    :ruby_eval: :code_eval_hash
     :page_configs: :page_configs
+    :page_templates: :files
+    :renderer_version: Fixnum
+    :ruby_eval: :code_eval_hash
   :allowed:
     :additional_templates: :full_file_paths
     :include: :include_hash
@@ -77,25 +83,46 @@
     - sidebar
     - text_body
 
-:config: # root config
+:consent:
   :object_class: Hash
-  :required:
-    :active_versions: :active_versions
-    :apply: :apply_config
+  :required: 
+    :field_options: :consent_field_options
+  :allowed:
+    :hidden_inputs: :hidden_inputs
 
-:consents_sections:
+:consent_field_options:
+  :object_class: Hash
+  :allowed:
+    :object_name: String
+    :attr_name: String
+    :label: :text_section
+    :is_padded: :boolean
+
+:consents:
   :object_class: Array
   :value_types:
-    - :consent_section
+    - :consent
 
 :consent_section:
   :object_class: Hash
   :required:
     :section_type: :consent_section_type
-    :consents: :consents
+  :required_when:
+    :section_type:
+      :li:
+        :consents: :consents
+      :checkbox:
+        :consents: :consents
+      :text:
+        :field_options: :consent_field_options
   :allowed:
     :hide_state_consents: :boolean
     :hide_conditions: :hide_conditions
+
+:consents_sections:
+  :object_class: Array
+  :value_types:
+    - :consent_section
 
 :consent_section_type:
   :object_class: String
@@ -104,16 +131,65 @@
     - li
     - text
 
-:consents:
+:error_messages:
+  :object_class: Hash
+  :allowed_min: 1
+  :allowed:
+    :client: :text_section
+    :server: :server_error_messages
+
+:fieldsets:
   :object_class: Array
   :value_types:
-    - :consent
+    - :form_element
 
-:consent:
+:fieldset_type:
+  :object_class: String
+  :allowed:
+    - fieldset
+
+# TODO: individual field_options for each field_type
+:field_options:
   :object_class: Hash
-  :required: 
-    :field_options: Hash # TODO field_options
+  :required:
+    :object_name: String
+    :attr_name: String
+  # TODO required when sister key
+  # :required_when_sister_key:
+  #   :element_type:
+  #     :select_input:
+  #       :options_tags: Hash # TODO option_tags
+  :allowed:
+    :address_autocomplete_enabled: :boolean
+    :button: :button
+    :caption: :text_section
+    :checkboxes: :multiple_checkboxes
+    :error: :error_messages
+    :hide_conditions: :hide_conditions
+    :is_padded: :boolean
+    :input_attrs: Hash
+    :label: :text_section
+    :option_tags: Hash # TODO option_tags
+    :placeholder: :text_line
+    :radio_buttons: :radio_buttons
+  :allowed_when:
+    :attr_name:
+      :acquisition_channel:
+        :angular_array: String
 
+:field_type:
+  :object_class: String
+  :allowed:
+    - checkbox_input
+    - hidden_input
+    - multiple_checkboxes
+    - password_input
+    - promo_code_button
+    - promo_code_input
+    - radio_input
+    - select_input
+    - ssn_input
+    - text_input
 
 :file:
   :object_class: String
@@ -156,16 +232,125 @@
     :use_counters: :boolean
     :attrs: Hash
 
+:form_elements:
+  :object_class: Array
+  :value_types:
+    - :form_element
+
+:form_element:
+  :object_class: Hash
+  :required:
+    :element_type: :form_element_type
+  :required_when:
+    :element_type:
+      :contracts:
+        :signed: :boolean
+      :fieldset:
+        :form_rows: :form_rows
+      :consents:
+        :sections: :consents_sections
+  :allowed:
+    :sections: Array # TODO form_element_sections
+    :attrs: Hash
+    :label: :text_section
+    :caption: :text_section
+    :partial: :file
+    :hide_conditions: :hide_conditions
+  :allowed_when:
+    :element_type:
+      :alert_box:
+        :no_icon: :boolean
+        :description: :text_section
+        :strong: :text_section
+      :contracts:
+        :instructions: :text_section
+      :consents:
+        :preconsent_message: :text_section
+        :hide_state_consents: :boolean
+      :fieldset:
+        :stackable: :boolean
+        :legend: :text_line
+        :always_show_child_fields: :boolean
+        :is_grouped_radio: :boolean
+      :loan_option_result:
+        :apr_popover: :text_section
+      :loan_options:
+        :apr_popover: :text_section
+      :no_orig_fee_eloan:
+        :content: :text_section
+      :payment_method:
+        :error: :error_messages
+        :payment_methods: :payment_methods
+      :show_in_array_section: 
+        :errors_requirements_array: Array # TODO: errors_requirements_array
+        :fieldsets: :fieldsets
+      :submit_button:
+        :credit_score_disclaimer: :text_section
+        :text: :text_line
+        :pre_submit: :text_section
+
+:form_element_type:
+  :object_class: String
+  :allowed:
+    - alert_box
+    - bank_account
+    - consents
+    - contracts
+    - credit_score_disclaimer
+    - form_top_alerts
+    - legal_notices
+    - loan_amount_slider
+    - loan_breakdown
+    - loan_option_result
+    - loan_options
+    - no_orig_fee_eloan
+    - payment_methods
+    - pre_form
+    - schumer_box
+    - submit_button
+
+:form_groups:
+  :object_class: Array
+  :value_types:
+    - :form_group
+
+:form_group:
+  :object_class: Hash
+  :required:
+    :field_type: :field_type
+    :field_options: :field_options
+  # TODO: individual field type field options
+  # :required_from_sister:
+  #   -
+  #     :sister_key: :field_type
+  #     :req_key: '%{sister_val}'
+  #     :req_val: '%{sister_val}_field_options'
+
+:form_rows:
+  :object_class: Array
+  :value_types:
+    - :form_row
+
+:form_row:
+  :object_class: Hash
+  :required:
+    :form_groups: :form_groups
+  :allowed:
+    :row_label: :text_section
+    :row_attrs: Hash
+    :row_caption: :text_section
+
 :form_sections:
   :object_class: Array
   :value_types:
     - :form_section
+    - :submit_section
+    - :consents_section
 
-# TODO finish form_section
 :form_section:
   :object_class: Hash
   :required:
-    :elements: Array # TODO: :form_elements
+    :elements: :form_elements
   :allowed:
     :attrs: Hash
     :label: :text_section
@@ -193,10 +378,23 @@
     :partial: :file
     :sections: :header_sections
 
+:header_element:
+  :object_class: Hash
+  :required:
+    :element_type: :file
+    :text: String
+  :allowed:
+    :attrs: Hash
+
+:header_elements:
+  :object_class: Array
+  :value_types:
+    - :header_element
+
 :header_section:
   :object_class: Hash
   :required:
-    :elements: :header_section_elements
+    :elements: :header_elements
   :allowed:
     :attrs: Hash
 
@@ -205,29 +403,26 @@
   :value_types:
     - :header_section
 
-:header_section_element:
+:hidden_input:
   :object_class: Hash
   :required:
-    :element_type: :file
-    :text: String
-  :allowed:
-    :attrs: Hash
+    :field_options: :consent_field_options
 
-:header_section_elements:
+:hidden_inputs:
   :object_class: Array
   :value_types:
-    - :header_section_element
+    - :hidden_input
 
 :hide_conditions:
   :object_class: Array
   :value_types:
-    - :boolean
-    - String
+    - :hide_condition
 
-:include_hash:
-  :object_class: Hash
-  :allowed:
-    :threat_matrix: :boolean
+:hide_condition:
+  :object_classes:
+    - String
+    - TrueClass
+    - FalseClass
 
 :icon_string:
   :object_class: String
@@ -235,6 +430,17 @@
     -
       :type: :regexp
       :parameters: /^#[\w-]*$/
+
+:include_hash:
+  :object_class: Hash
+  :allowed:
+    :threat_matrix: :boolean
+
+:input_value:
+  :object_classes:
+    - String
+    - TrueClass
+    - FalseClass
 
 :legal_notices:
   :object_class: Hash
@@ -262,6 +468,18 @@
   :allowed:
     :small_sections: :text_sections
 
+:link:
+  :object_class: Hash
+  :required:
+    :href: :url
+    :text: :text_line
+
+:multiple_checkboxes:
+  :object_class: Hash
+  :allowed:
+    :angular_array: String
+    :selected_array: String
+
 :page_config:
   :object_class: Hash
   :required:
@@ -278,9 +496,43 @@
       :req_key: '%{sister_val}'
       :req_val: :page_config
 
+:payment_methods:
+  :object_class: Array
+  :value_types:
+    - :payment_method
+
+:payment_method:
+  :object_class: Hash
+  :required:
+    :title: :text_section
+    :description: :text_section
+    :value: :input_value
+    :icon: String
+  :allowed:
+    :recommended: :text_section
+
+:preexisting_error_message:
+  :object_class: Hash
+  :allowed:
+    :partial: :file
+    :server_message: :text_section
+    :client_message: :text_section
+    :link: :link
+
 # Keep progress steps or no?
 :progress_config:
   :object_class: Hash
+
+:radio_buttons:
+  :object_class: Array
+  :value_types:
+    - :radio_button
+
+:radio_button:
+  :object_class: Hash
+  :required:
+    :label: :text_section
+    :value: :input_value
 
 :rate:
   :required:
@@ -295,6 +547,11 @@
     :apply: :files
     :basic: :files
 
+:server_error_messages:
+  :object_class: Hash
+  :allowed:
+    :preexisting: :preexisting_error_message
+
 :shared_configs:
   :object_class: Hash
   :allowed:
@@ -304,8 +561,7 @@
 :sidebar_config:
   :object_class: Hash
   :required:
-    :elements: Array
-    # TODO: :sidebar_elements
+    :elements: Array # TODO: :sidebar_elements
 
 :styles:
   :object_class: Array
@@ -402,8 +658,9 @@
     :template: :text_template
     :text: :text_line
     :text_lines: :text_lines
+    :optional: :boolean
   :allowed_when:
-    '@object_name':
+    '@object_name': # any key name allowed
       :label:
         :increment_counter: :boolean
         :sublabel: :text_section
@@ -444,7 +701,6 @@
 :text_template_link_type_string:
   :object_class: String
   :allowed:
-  :validations:
     - modal
     - url
     - tooltip

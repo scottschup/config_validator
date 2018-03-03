@@ -238,7 +238,6 @@ component_configs:
                       -
                         field_type: 'select_input'
                         field_options:
-                          input_type: 'select_input'
                           object_name: 'income'
                           attr_name: 'pay_frequency'
                           option_tags:
