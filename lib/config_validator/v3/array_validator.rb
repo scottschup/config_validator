@@ -8,15 +8,15 @@ class ConfigValidator
       super
       unless has_only_allowed_values?
         return false if @just_checking
-        err_msg = "'#{@invalid_value.colorize(:cyan)}' is not an allowed value.\n (#{ConfigValidator.class_eval '@@counter'})"
+        err_msg = "'#{@invalid_value.colorize(:cyan)}' is not an allowed value.\n (#{ConfigValidator.class_eval '@@objects.keys.length'})"
         err = (InvalidValueError.new err_msg, { trace: @object_trace, object: @object })
         ConfigValidator.class_eval '@@errors << err'
       end
 
       unless has_correct_number_of_elements?
         return false if @just_checking
-        err_msg = "'#{@object_name.colorize(:cyan)} (type: #{@object_data_type.colorize(:cyan)})' has an invalid number of elements. (#{ConfigValidator.class_eval '@@counter'})"
-        err_msg += "\nExpected between #{@expected_range[:min].colorize(:light_white).bold} and #{@epxected_range[:max].colorize(:light_white).bold}, but got #{@actual_array_length.colorize(:cyan)}.\n"
+        err_msg = "'#{@object_name.to_s.colorize(:cyan)} (type: #{@object_data_type.to_s.colorize(:cyan)})' has an invalid number of elements. (#{ConfigValidator.class_eval '@@objects.keys.length'})"
+        err_msg += "\nExpected between #{@expected_range[:min].to_s.colorize(:light_white).bold} and #{@epxected_range[:max].to_s.colorize(:light_white).bold}, but got #{@actual_array_length.to_s.colorize(:cyan)}.\n"
         err = (InvalidNumberOfElementsError.new err_msg, { trace: @object_trace, object: @object })
         ConfigValidator.class_eval '@@errors << err'
       end
@@ -25,7 +25,7 @@ class ConfigValidator
       @object.each do |element|
         next if is_an_allowed_value_type?(element)
         return false if @just_checking
-        err_msg = "#{@next_data_type.colorize(:cyan)} is not a valid data type for #{@object_name.colorize(:light_white).bold} (#{ConfigValidator.class_eval '@@counter'})"
+        err_msg = "#{@next_data_type.to_s.colorize(:cyan)} is not a valid data type for #{@object_name.to_s.colorize(:light_white).bold} (#{ConfigValidator.class_eval '@@objects.keys.length'})"
         err = (InvalidValueType.new err_msg, { trace: @object_trace, object: @object })
         ConfigValidator.class_eval '@@errors << err'
       end

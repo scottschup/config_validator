@@ -4,6 +4,7 @@ require 'json'
 require 'yaml'
 
 class ConfigValidator
+  SUPPORTED_CONFIG_VERSIONS = %w(3.0)
   def self.printable_object_trace(message, object_trace, object = '')
     trace_string = object_trace.join(' > ')
     divided_on_file = trace_string.split('.yml > ')
@@ -15,22 +16,37 @@ class ConfigValidator
 
   def self.reset_counters!
     @@errors = []
-    @@counter = 0
+    @@objects = Hash.new { |h, k| h[k] = {} }
     @@terminal_objects = []
   end
 
+  def self.root_path
+    File.dirname(__FILE__)
+  end
+
   def initialize(market_partner_product: '',
-                 config_path: 'sample_config/customer_application',
+                 config_path: 'config/customer_application',
                  root_path: nil,
-                 config_version: 1)
+                 config_version: '3.0')
+    return "Config version #{config_version} not supported." unless SUPPORTED_CONFIG_VERSIONS.include?(config_version)
     @market_partner_product = market_partner_product.to_sym
     @config_path = config_path
-    @root_path = root_path || defined?(Rails) ? Rails.root : Dir.pwd
+    @root_path = root_path || ::Rails.root rescue self.class.root_path
     @config_version = config_version
   end
 
-  def generate_schema
-    
+  def generate_schema(version: '3.0', output: :yaml)
+    @data_types = ObjectValidatorBase.reload_data_types!(version)
+    @schema = {}
+    @key_path = []
+    add_schema_nodes!
+  end
+
+  def add_schema_nodes(node: :root_config)
+    config = @data_types[:root_config]
+    config[:required].each do |key, config|
+      # TODO
+    end
   end
 
   def reload!
@@ -42,17 +58,17 @@ class ConfigValidator
 
   def validate
     self.class.reset_counters!
-    config = config_compiler(config_version: 1).configs_to_test.each do |mpp, config|
-      @renderer_version = config.dig(:apply, :renderer_version)
-      load_renderer_version_specific_files
+    config = config_compiler.configs_to_test.each do |mpp, config|
+      renderer_version = @config_version.to_i.to_s
+      load_renderer_version_specific_files renderer_version
       args = {
         object: config,
         object_data_type: :root_config,
         object_name: :'config.yml',
         object_trace: [mpp],
-        renderer_version: @renderer_version
+        renderer_version: renderer_version
       }
-      puts "\nValidating #{mpp}".colorize(:light_magenta)
+      puts "Validating #{mpp}".colorize(:light_magenta)
       HashValidator.new(args).valid?
     end
 
@@ -63,30 +79,27 @@ class ConfigValidator
 
   private
 
-  def config_compiler(config_version: 1)
+  def config_compiler(market_partner_product: nil, config_path: nil, root_path: nil, config_version: nil)
     @config_compiler ||= Compiler.new(
-      market_partner_product: @market_partner_product,
-      config_path: @config_path,
-      root_path: @root_path,
-      config_version: config_version)
+      market_partner_product: market_partner_product || @market_partner_product,
+      config_path: config_path || @config_path,
+      root_path: root_path || @root_path,
+      config_version: config_version || @config_version)
   end
 
-  def load_renderer_version_specific_files
+  def load_renderer_version_specific_files(version)
     dir = File.dirname(__FILE__)
-    outcome = "DONE!".colorize(:green)
-    print "Loading ".colorize(:light_yellow)
-    print 'files from '
-    print "#{dir}/config_validator/v#{@renderer_version}/ ...".colorize(:light_white)
-    load "#{dir}/config_validator/v#{@renderer_version}/object_validator_base.rb"
-    load "#{dir}/config_validator/v#{@renderer_version}/string_validator.rb"
-    load "#{dir}/config_validator/v#{@renderer_version}/array_validator.rb"
-    load "#{dir}/config_validator/v#{@renderer_version}/hash_validator.rb"
-    puts outcome
+    %w(object_validator_base.rb string_validator.rb array_validator.rb hash_validator.rb).each do |file|
+      outcome = "Ok!".colorize(:green)
+      full_file_path = "#{dir}/config_validator/v#{version}/#{file}"
+      print "#{('Loading v' + version.to_s + ':').colorize(:light_yellow)} #{full_file_path}..."
+      load full_file_path
+      puts outcome
+    end
   rescue Exception => e
     outcome = "FAILED :(".colorize(:red)
     puts outcome
-    puts e.message
-  ensure
+    raise e
   end
 
   def print_errors
@@ -107,40 +120,36 @@ class ConfigValidator
   def print_results
     print_errors
 
-    objects, counter = [@@objects.keys.length, @@counter] # this is just to avoid the ruby syntax bug in sublime :( https://github.com/sublimehq/Packages/issues/1150
+    objects, counter = [@objects.keys.length, @@objects.keys.length] # this is just to avoid the ruby syntax bug in sublime :( https://github.com/sublimehq/Packages/issues/1150
     print "\n#{counter}".colorize(:light_white).bold
     print " objects validated out of "
     puts objects.to_s.colorize(:light_white).bold
 
-    reset_object_counter!
-    object_counter(@@terminal_objects.map { |obj_hash| obj_hash[:object] })
-    skipped_objects = @@objects.keys.length
-    puts "#{skipped_objects.to_s.colorize(:light_white).bold} objects skipped due to terminal parent objects"
-
-    coverage = ((counter + skipped_objects) * 100.0 / objects).round(2)
+    coverage = (counter * 100.0 / objects).round(2)
     color = coverage >= 90 ? :green : coverage >= 50 ? :yellow : :red
     puts "Validation coverage: #{(coverage.to_s + '%').colorize color}"
     @@errors.empty?
   end
 
+  # TODO: refactor out into ObjectCounter class
   def reset_object_counter!
-    @@objects = {}
+    @objects = {}
   end
 
   def object_counter(obj)
     if obj.respond_to? :keys
-      key_counter(obj)
+      hash_key_counter(obj)
     elsif obj.respond_to? :join
       array_element_counter(obj)
     else
-      @@objects[obj.object_id] = true
+      @objects[obj.object_id] = true
     end
   end
 
-  def key_counter(hsh)
+  def hash_key_counter(hsh)
     return unless hsh.respond_to? :keys
+    @objects[hsh.object_id] = true
     hsh.keys.each do |key|
-      @@objects[hsh.keys.object_id] = true
       next if key.to_s.include?('attrs')
       object_counter hsh[key]
     end
@@ -148,8 +157,8 @@ class ConfigValidator
 
   def array_element_counter(arr)
     return unless arr.respond_to? :join
+    @objects[arr.object_id] = true
     arr.each do |el|
-      @@objects[arr.object_id] = true
       object_counter el
     end
   end

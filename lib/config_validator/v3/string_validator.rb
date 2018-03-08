@@ -17,7 +17,7 @@ class ConfigValidator
           is_valid = false unless eval(validation[:parameters]) =~ @object
         else
           return false if @just_checking
-          err_msg = "#{validation[:type].to_s.colorize(:cyan)} is not a supported String validation type (#{ConfigValidator.class_eval '@@counter'})"
+          err_msg = "#{validation[:type].to_s.colorize(:cyan)} is not a supported String validation type (#{ConfigValidator.class_eval '@@objects.keys.length'})"
           ConfigValidator.class_eval '@@errors << (UnsupportedValidationTypeError.new err_msg, { trace: @object_trace, object: @object })'
         end
       end

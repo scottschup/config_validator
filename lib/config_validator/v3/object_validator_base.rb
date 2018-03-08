@@ -1,15 +1,15 @@
 class ConfigValidator
   class ObjectValidatorBase
-    def self.load_data_types!
+    def self.load_data_types!(version: nil)
       return if defined?(@@data_types) && !@@data_types.nil?
-      file_path = "./lib/data_types/v#{@@renderer_version}.yml"
-      puts "Loading:".colorize(:light_yellow) + " #{file_path}"
+      file_path = "#{ConfigValidator.root_path}/data_types/v#{version || @@renderer_version}.yml"
+      puts "Loading data types:".colorize(:light_yellow) + " #{file_path}"
       @@data_types = YAML.load_file(file_path)
     end
 
-    def self.reload_data_types!
+    def self.reload_data_types!(version: nil)
       @@data_types = nil
-      load_data_types!
+      load_data_types!(version)
     end
 
     def self.reset_shared_configs!
@@ -17,7 +17,7 @@ class ConfigValidator
     end
 
     def initialize(object:, object_data_type:, object_name:, object_trace:, parent_object: {}, renderer_version: nil)
-      @@renderer_version = renderer_version ? renderer_version : (@@renderer_version || :v3)
+      @@renderer_version = renderer_version ? renderer_version : (@@renderer_version || '3.0')
       self.class.load_data_types!
 
       @object = object
@@ -33,9 +33,11 @@ class ConfigValidator
 
     def valid?
       update_object_trace!
-      ConfigValidator.class_eval '@@counter += 1'
-      status_msg = "Object #{ConfigValidator.class_eval '@@counter'}: Validating: ".colorize(:cyan)
-      puts ConfigValidator.printable_object_trace(status_msg, @object_trace, @object)
+      id = @object.object_id
+      ConfigValidator.class_eval '@@objects[id] = true'
+      # Toggle on for troubleshooting/debugging
+      # status_msg = "Object #{ConfigValidator.class_eval '@@objects.keys.length'}: Validating: ".colorize(:cyan)
+      # puts ConfigValidator.printable_object_trace(status_msg, @object_trace, @object)
       is_valid = true
 
       case @object_data_type
@@ -48,7 +50,7 @@ class ConfigValidator
         @valid_config = @@data_types[@object_data_type] || {}
         if @valid_config.empty?
           return false if @just_checking
-          err_msg = "'#{@object_data_type.to_s.colorize(:cyan)}' is missing from #{'data_types.yml'.colorize(:magenta)} (#{ConfigValidator.class_eval '@@counter'})\n"
+          err_msg = "'#{@object_data_type.to_s.colorize(:cyan)}' is missing from #{'data_types.yml'.colorize(:magenta)} (#{ConfigValidator.class_eval '@@objects.keys.length'})\n"
           err = (MissingDataTypeError.new err_msg, { trace: @object_trace, object: @object })
           ConfigValidator.class_eval '@@errors << err'
           is_valid = false
@@ -57,7 +59,7 @@ class ConfigValidator
         @expected_classes.each do |klass|
           if klass.nil?
             return false if @just_checking
-            err_msg = "#{(':' + @object_name.to_s).colorize(:cyan)} config is missing the parameter #{':object_class or :object_classes'.colorize(:light_white).bold} (#{ConfigValidator.class_eval '@@counter'})\n"
+            err_msg = "#{(':' + @object_name.to_s).colorize(:cyan)} config is missing the parameter #{':object_class or :object_classes'.colorize(:light_white).bold} (#{ConfigValidator.class_eval '@@objects.keys.length'})\n"
             err = (MissingObjectClassError.new err_msg, { trace: @object_trace, object: @object })
             ConfigValidator.class_eval '@@errors << err'
             is_valid = false
@@ -68,7 +70,7 @@ class ConfigValidator
         is_valid
       else
         return false if @just_checking
-        err_msg = "Expected: #{'String or Symbol'.colorize(:light_white).bold}; Actual: #{@actual_class.colorize(:cyan)} (#{ConfigValidator.class_eval '@@counter'})\n"
+        err_msg = "Expected: #{'String or Symbol'.colorize(:light_white).bold}; Actual: #{@actual_class.colorize(:cyan)} (#{ConfigValidator.class_eval '@@objects.keys.length'})\n"
         err = (InvalidClassError.new err_msg, { trace: @object_trace, object: @object })
         ConfigValidator.class_eval '@@errors << err'
         false
@@ -83,6 +85,10 @@ class ConfigValidator
 
     def next_object_valid?
       is_valid = true
+
+      id = @next_object.object_id
+      ConfigValidator.class_eval '@@objects[id] = true'
+
       # Requires @next_object and @next_data_type to be set
       not_set = []
       %i(@next_object @next_data_type @next_object_name).each do |ivar|
@@ -90,7 +96,7 @@ class ConfigValidator
       end
       unless not_set.empty?
         return false if @just_checking
-        err_msg = "The following instance variables are not set: #{not_set.join(', ').colorize(:cyan)} (#{ConfigValidator.class_eval '@@counter'})\n"
+        err_msg = "The following instance variables are not set: #{not_set.join(', ').colorize(:cyan)} (#{ConfigValidator.class_eval '@@objects.keys.length'})\n"
         err = (MissingInstanceVariableError.new err_msg, { trace: @object_trace, object: @object })
         ConfigValidator.class_eval '@@errors << err'
         is_valid = false
@@ -112,11 +118,10 @@ class ConfigValidator
 
         is_valid && new_validator.valid?
       when String
-        ConfigValidator.class_eval '@@terminal_objects << { name: @next_object_name, data_type: @next_data_type, object: @object }'
         unless next_actual_class == @next_data_type.constantize
           return false if @just_checking
           update_object_trace! object_name: @next_object_name
-          err_msg = "Expected: #{@next_data_type.colorize(:light_white).bold}; Actual: #{next_actual_class.colorize(:cyan)} (#{ConfigValidator.class_eval '@@counter'})\n"
+          err_msg = "Expected: #{@next_data_type.colorize(:light_white).bold}; Actual: #{next_actual_class.colorize(:cyan)} (#{ConfigValidator.class_eval '@@objects.keys.length'})\n"
           err = (InvalidClassError.new err_msg, { trace: @object_trace, object: @object })
           ConfigValidator.class_eval '@@errors << err'
           is_valid = false
@@ -125,7 +130,7 @@ class ConfigValidator
         return false if @just_checking || ConfigValidator.class_eval('!@@errors.empty? && @@errors.last.message.include?(@next_object_name.to_s)')
         err_msg = "Invalid @next_data_type for #{@next_object_name.to_s.colorize(:light_white).bold}. "
         err_msg += "Expected class to be: #{'Symbol or String'.colorize(:light_white).bold}; "
-        err_msg += "Actual @next_data_type class: #{@next_data_type.class.to_s.colorize(:cyan)} (#{ConfigValidator.class_eval '@@counter'})\n"
+        err_msg += "Actual @next_data_type class: #{@next_data_type.class.to_s.colorize(:cyan)} (#{ConfigValidator.class_eval '@@objects.keys.length'})\n"
         err = (InvalidDataTypeError.new err_msg, { trace: @object_trace, object: @object })
         ConfigValidator.class_eval '@@errors << err'
         is_valid = false
@@ -140,7 +145,7 @@ class ConfigValidator
     def is_class_valid?
       unless @expected_classes.include? @actual_class.to_s
         return false if @just_checking
-        err_msg = "Expected: #{@expected_classes.join(' or ').colorize(:light_white).bold}; Got: #{@actual_class.to_s.colorize(:cyan)} (#{ConfigValidator.class_eval '@@counter'})\n"
+        err_msg = "Expected: #{@expected_classes.join(' or ').colorize(:light_white).bold}; Got: #{@actual_class.to_s.colorize(:cyan)} (#{ConfigValidator.class_eval '@@objects.keys.length'})\n"
         err = (InvalidClassError.new err_msg, { trace: @object_trace, object: @object })
         ConfigValidator.class_eval '@@errors << err'
         false

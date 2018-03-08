@@ -8,7 +8,7 @@ class ConfigValidator
                    config_version:)
       @mpp = market_partner_product.to_sym
       @config_path = config_path
-      @root_path = root_path || (::Rails.root rescue File.dirname(__FILE__))
+      @root_path = root_path || ::Rails.root rescue File.dirname(__FILE__)
       @config_version = config_version
       @compiled_config = {}
     end
@@ -17,22 +17,25 @@ class ConfigValidator
       File.join @root_path, @config_path, @mpp.to_s
     end
 
-    def base_version_path(version = 1)
-      File.join base_path, 'v', version.to_s
+    def base_version_path(version = nil)
+      File.join base_path, 'v', (version || @config_version)
     end
 
     def build_config
       load_root_config_yaml_file!
-      unless valid_active_version?
-        err_msg = "Version #{@config_version} not in [#{config[:active_versions.join(', ')]}]"
+      unless valid_active_version? || @config_version == '3.0'
+        err_msg = "Version #{@config_version} not in [#{@compiled_config[:active_versions].join(', ')}]"
         raise InvalidConfigVersionError.new err_msg
       end
 
       load_version_config_yaml_file!
       unless page_templates = @compiled_config.dig(@mpp, :apply, :page_templates)
+        err_msg = "Missing page_templates array in version_config.yml for #{@mpp}"
+        raise MissingRequiredParameterError.new err_msg
       end
+
+      page_configs = @compiled_config.dig(@mpp, :apply, :page_configs) || {}
       page_templates.each do |page|
-        page_configs = @compiled_config.dig(@mpp, :apply, :page_configs) || {}
         # skip pages that don't have their own dirs and are already in page_configs
         next if page_configs.keys.include? page.to_sym
         load_page_config_yaml_file! page
@@ -61,9 +64,9 @@ class ConfigValidator
 
     def load_root_config_yaml_file!
       file_path = root_config_file_path
-      print "Loading:".colorize(:yellow) + " #{file_path}..."
+      print "Loading config:".colorize(:yellow) + " #{file_path}..."
       @compiled_config[@mpp] = YAML.load_file(file_path).deep_symbolize_keys
-      puts "DONE!".colorize(:green)
+      puts "Ok!".colorize(:green)
     rescue StandardError => e
       puts "FAILED :(".colorize(:red)
       raise RootConfigNotFoundError.new "Missing #{relevant_path(file_path, @mpp).colorize(:light_white)} for #{@mpp}"
@@ -71,10 +74,10 @@ class ConfigValidator
 
     def load_version_config_yaml_file!
       file_path = version_config_file_path
-      print "Loading:".colorize(:yellow) + " #{file_path}..."
+      print "Loading config:".colorize(:yellow) + " #{file_path}..."
       version_config = YAML.load_file(file_path).deep_symbolize_keys
       @compiled_config[@mpp].merge! version_config
-      puts "DONE!".colorize(:green)
+      puts "Ok!".colorize(:green)
     rescue StandardError => e
       puts "FAILED :(".colorize(:red)
       err_msg = "Missing #{relevant_path(file_path).colorize(:light_white)} for #{@mpp}"
@@ -83,10 +86,10 @@ class ConfigValidator
 
     def load_page_config_yaml_file!(page)
       file_path = page_config_file_path(page)
-      print "Loading:".colorize(:yellow) + " #{file_path}..."
+      print "Loading config:".colorize(:yellow) + " #{file_path}..."
       page_config = YAML.load_file(file_path).deep_symbolize_keys
       @compiled_config[@mpp][:apply][:page_configs][page] = page_config
-      puts "DONE!".colorize(:green)
+      puts "Ok!".colorize(:green)
     rescue StandardError => e
       puts "FAILED :(".colorize(:red)
       if e.message.include? 'No such file'

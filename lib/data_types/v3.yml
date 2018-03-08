@@ -8,7 +8,10 @@
   :object_class: Array
   :allowed_min: 1
   :allowed: 
-    - 1
+    - '1'
+    - '1.0'
+    - '2.0'
+    - '3.0'
 
 :apply_config:
   :object_class: Hash
@@ -18,7 +21,6 @@
     :modals: :files
     :page_configs: :page_configs
     :page_templates: :files
-    :renderer_version: Fixnum
     :ruby_eval: :code_eval_hash
   :allowed:
     :additional_templates: :full_file_paths
